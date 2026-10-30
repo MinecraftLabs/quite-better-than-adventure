@@ -3,74 +3,67 @@ package quitebetter.mixin.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.FlagRenderer;
-import net.minecraft.client.render.TextureManager;
-import net.minecraft.client.render.model.ModelFlag;
+import net.minecraft.client.render.renderer.BlendFactor;
+import net.minecraft.client.render.renderer.GLRenderer;
+import net.minecraft.client.render.renderer.State;
+import net.minecraft.client.render.tessellator.TessellatorGeneral;
+import net.minecraft.client.render.tileentity.TileEntityRenderer;
 import net.minecraft.client.render.tileentity.TileEntityRendererFlag;
-import net.minecraft.core.block.Block;
 import net.minecraft.core.block.entity.TileEntityFlag;
 import net.minecraft.core.util.helper.Direction;
+import net.minecraft.core.util.helper.MathHelper;
 import net.minecraft.core.world.World;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.core.world.pos.TilePos;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.useless.dragonfly.models.entity.StaticEntityModel;
 
 @Mixin(
 	value = {TileEntityRendererFlag.class},
 	remap = false
 )
-public class TileEntityRendererFlagMixin {
+public abstract class TileEntityRendererFlagMixin extends TileEntityRenderer<TileEntityFlag> {
 	@Shadow
+	@Final
+	private FlagRenderer flagRenderer;
+	@Shadow
+	@Final
 	public Minecraft mc;
-	@Shadow
-	private ModelFlag modelFlag;
-	@Shadow
-	private ModelFlag modelFlagMirrored;
-	@Shadow
-	private static FlagRenderer flagRenderer;
 	@Shadow
 	private long lastTick;
 
+	@Unique
 	private static final float rotationValue = 15F;
+	@Unique
 	private static final float pushValue = 0.4F;
 
-	private void loadTexture(String texturePath) {
-		TileEntityRendererFlag terf = (TileEntityRendererFlag)(Object)this;
-		TextureManager textureManager = terf.renderDispatcher.textureManager;
-		textureManager.bindTexture(textureManager.loadTexture(texturePath));
-	}
-
-	private void setModelRotation(ModelFlag model, float x, float y, float z) {
-		model.flagPole.setRotationPoint(0,0,0);
-		model.flagPoleShort.setRotationPoint(0,0,0);
-		model.flag.setRotationPoint(0,0,0);
-		model.flagOverlay.setRotationPoint(0,0,0);
-		model.flagBase.setRotationPoint(0,0,0);
-
-		model.flagPole.setRotationAngle(x,y,z);
-		model.flagPoleShort.setRotationAngle(x,y,z);
-		model.flag.setRotationAngle(x,y,z);
-		model.flagOverlay.setRotationAngle(x,y,z);
-		model.flagBase.setRotationAngle(x,y,z);
+	@ModifyVariable(
+		method = "doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V",
+		at = @At("HEAD"),
+		argsOnly = true
+	)
+	private boolean modifyShortPole(boolean shortPole, TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPoleArg, float windDirection, float windIntensity) {
+		World theWorld = this.mc.currentWorld;
+		return shortPole && theWorld.getBlockData(tileEntityFlag.tilePos.down(new TilePos())) == 0;
 	}
 
 	@Inject(
-		method = {"Lnet/minecraft/client/render/tileentity/TileEntityRendererFlag;doRender(Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V"},
+		method = {"doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V"},
 		at = @At("HEAD"),
 		cancellable = true
 	)
-	private void doRender(TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirection, float windIntensity, CallbackInfo ci) {
-		TileEntityRendererFlag terf = (TileEntityRendererFlag)(Object)this;
-		World theWorld = Minecraft.getMinecraft().currentWorld;
-		int meta = theWorld.getBlockMetadata(tileEntityFlag.x,tileEntityFlag.y,tileEntityFlag.z);
-		int lowermeta = theWorld.getBlockMetadata(tileEntityFlag.x,tileEntityFlag.y-1,tileEntityFlag.z);
-		Direction dir = Direction.getDirectionById(meta);
-		boolean diagonal = dir.isHorizontal();
-
-		if (flagRenderer == null) {
-			flagRenderer = new FlagRenderer(terf.renderDispatcher.textureManager);
+	private void doRender(TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirection, float windIntensity, CallbackInfo ci) {
+		World theWorld = this.mc.currentWorld;
+		int meta = theWorld.getBlockData(tileEntityFlag.tilePos);
+		Direction dir = Direction.fromId(meta);
+		if (!dir.isHorizontal()) {
+			return;
 		}
 
 		if (theWorld.getWorldTime() != lastTick) {
@@ -81,72 +74,50 @@ public class TileEntityRendererFlagMixin {
 		float swayInterpolated = (float)tileEntityFlag.sway + partialTick;
 		float sway = (float)((double)swayInterpolated / (double)1.5F % (Math.PI * 2D));
 		sway = (float)(Math.sin((double)sway) * (double)windIntensity * (double)2.0F);
-		GL11.glPushMatrix();
-		float scale = 1.0F;
-
-		if (diagonal) {
-			GL11.glTranslatef(
-				(float)x + 0.5F - dir.getOffsetX()*pushValue,
-				(float)y + 0.75F,
-				(float)z + 0.5F - dir.getOffsetZ()*pushValue);
-
-			GL11.glRotatef(rotationValue, dir.getOffsetZ(), 0, -dir.getOffsetX());
-		} else {
-			GL11.glTranslatef((float)x + 0.5F, (float)y + 0.75F, (float)z + 0.5F);
-			setModelRotation(modelFlag,0.0F,0.0F,0.0F);
+		GLRenderer.pushFrame();
+		GLRenderer.modelM4f().translate((float)x + 0.5F - dir.offsetX()*pushValue, (float)y + 0.75F, (float)z + 0.5F - dir.offsetZ()*pushValue);
+		GLRenderer.modelM4f().rotate(rotationValue * MathHelper.DEG_TO_RAD, dir.offsetZ(), 0.0F, -dir.offsetX());
+		GLRenderer.modelM4f().translate(0.0F, -0.75F, 0.0F);
+		GLRenderer.modelM4f().scale(0.0625F, 0.0625F, -0.0625F);
+		this.bindTexture("/assets/minecraft/textures/entity/flag.png");
+		StaticEntityModel flagModel = this.getModel("pole.long");
+		int angle = 0;
+		switch (dir) {
+			case NORTH:
+				angle = 3;
+				break;
+			case EAST:
+				angle = 0;
+				break;
+			case SOUTH:
+				angle = 1;
+				break;
+			case WEST:
+				angle = 2;
+				break;
 		}
-
-		GL11.glScalef(1.0F, -1.0F, -1.0F);
-		loadTexture("/assets/minecraft/textures/entity/flag.png");
-		if (diagonal) {
-			modelFlag.renderPole();
-		} else {
-			if (shortPole && lowermeta==0) {
-				modelFlag.renderPoleShort();
-			} else {
-				modelFlag.renderPole();
-				modelFlag.renderBase();
-			}
-		}
-
-		GL11.glPushMatrix();
-		if (diagonal) {
-			int angle = 0;
-			switch (dir) {
-				case NORTH:
-					angle = 3;
-					break;
-				case EAST:
-					angle = 0;
-					break;
-				case SOUTH:
-					angle = 1;
-					break;
-				case WEST:
-					angle = 2;
-					break;
-			}
-			GL11.glRotatef(angle*90 + sway, 0.0F, 1.0F, 0.0F);
-		} else {
-			GL11.glRotatef(windDirection + sway, 0.0F, 1.0F, 0.0F);
-		}
-		modelFlag.renderFlag();
-		terf.renderDispatcher.textureManager.bindTexture(flagRenderer.getTexture(tileEntityFlag));
-		GL11.glEnable(3042);
-		GL11.glBlendFunc(769, 768);
+		flagModel.getTransform("base").visible = false;
+		flagModel.getTransform("flag").rotY = (angle*90 + sway) * MathHelper.DEG_TO_RAD;
+		flagModel.render();
+		flagModel.getTransform("base").visible = true;
+		flagModel.translateToBone("flag");
+		this.bindTexture("/assets/minecraft/textures/entity/flag_ui.png");
 		if (tileEntityFlag.getFlipped()) {
-			modelFlagMirrored.renderFlagOverlay();
+			this.getModel("cloth.mirror").render();
+			GLRenderer.enableState(State.BLEND);
+			GLRenderer.setBlendFunc(BlendFactor.ONE_MINUS_SRC_COLOR, BlendFactor.SRC_COLOR);
+			this.renderDispatcher.textureManager.bindTexture(flagRenderer.getTexture(tileEntityFlag));
+			this.getModel("cloth.mirror").render();
 		} else {
-			modelFlag.renderFlagOverlay();
+			this.getModel("cloth").render();
+			GLRenderer.enableState(State.BLEND);
+			GLRenderer.setBlendFunc(BlendFactor.ONE_MINUS_SRC_COLOR, BlendFactor.SRC_COLOR);
+			this.renderDispatcher.textureManager.bindTexture(flagRenderer.getTexture(tileEntityFlag));
+			this.getModel("cloth").render();
 		}
 
-		GL11.glDisable(3042);
-		GL11.glPopMatrix();
-		float f4 = 0.01666667F;
-		GL11.glTranslatef(0.0F, 0.5F, 0.07F);
-		GL11.glScalef(0.01666667F, -0.01666667F, 0.01666667F);
-		GL11.glNormal3f(0.0F, 0.0F, -0.01666667F);
-		GL11.glPopMatrix();
+		GLRenderer.disableState(State.BLEND);
+		GLRenderer.popFrame();
 
 		ci.cancel();
 	}

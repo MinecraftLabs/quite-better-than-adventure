@@ -15,10 +15,11 @@ import static quitebetter.core.ModCore.MOD_ID;
 @Environment(EnvType.CLIENT)
 public class BlockModelHazardPainted<T extends BlockLogic> extends BlockModelStandard<T> {
 	public static final IconCoordinate[] texCoords = new IconCoordinate[16];
-	public BlockModelHazardPainted(Block block) {
+	public BlockModelHazardPainted(Block<T> block) {
 		super(block);
 	}
 
+	@Override
 	public IconCoordinate getBlockTextureFromSideAndMetadata(Side side, int data) {
 		return texCoords[data & 15];
 	}

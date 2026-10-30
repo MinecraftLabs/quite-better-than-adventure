@@ -1,5 +1,6 @@
 package quitebetter.mixin.client;
 
+import net.minecraft.client.option.enums.TextureAnimation;
 import net.minecraft.client.render.TextureManager;
 import net.minecraft.client.render.dynamictexture.DynamicTexture;
 import net.minecraft.client.render.dynamictexture.DynamicTextureCustom;
@@ -8,14 +9,9 @@ import net.minecraft.client.render.texture.stitcher.IconCoordinate;
 import net.minecraft.client.render.texture.stitcher.TextureRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static quitebetter.core.ModCore.MOD_ID;
 
@@ -23,31 +19,17 @@ import static quitebetter.core.ModCore.MOD_ID;
 	value = {TextureManager.class},
 	remap = false
 )
-public class TextureMagangerMixin {
+public abstract class TextureMagangerMixin {
 
 	@Shadow
-	public final Map<String, DynamicTexture> dynamicTextures = new HashMap();
-
-	@Unique
-	public void addDynamicTexture(DynamicTexture texture) {
-		this.addDynamicTextureOverride(texture, false);
-	}
-
-	@Unique
-	public void addDynamicTextureOverride(DynamicTexture texture, boolean override) {
-		if (override || !this.dynamicTextures.containsKey(texture.targetTexture.namespaceId)) {
-			this.dynamicTextures.put(texture.targetTexture.namespaceId.namespace() + ":" + (String)TextureRegistry.stitcherMapReverse.get(texture.targetTexture.parentAtlas) + "/" + texture.targetTexture.namespaceId.value(), texture);
-		}
-	}
+	protected abstract void addDynamicTexture(DynamicTexture texture);
 
 	@Inject(
 		method = "addNativeDynamicTextures",
-		at = @At("HEAD"),
-		locals = LocalCapture.CAPTURE_FAILSOFT
-
+		at = @At("HEAD")
 	)
-	public void addNativeDynamicTextures(int state, CallbackInfo ci) {
-		if (state > 0) {
+	public void addNativeDynamicTextures(TextureAnimation state, CallbackInfo ci) {
+		if (state != TextureAnimation.OFF) {
 			//FAN
 			String[] activesides = new String[]{"top", "side", "side_inverted"};
 			for(String side : activesides) {

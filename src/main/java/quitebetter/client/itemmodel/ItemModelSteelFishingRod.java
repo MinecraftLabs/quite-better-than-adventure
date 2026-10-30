@@ -19,11 +19,12 @@ public class ItemModelSteelFishingRod extends ItemModelStandard {
 	protected IconCoordinate rodCast = TextureRegistry.getTexture(MOD_ID+":item/tool_steel_fishingrod_cast");
 	protected IconCoordinate rodDefault = TextureRegistry.getTexture(MOD_ID+":item/tool_steel_fishingrod");
 
-	public ItemModelSteelFishingRod(Item item, String namespace) {
-		super(item, namespace);
+	public ItemModelSteelFishingRod(Item item, boolean defaultTextureLookup) {
+		super(item, defaultTextureLookup);
 	}
 
-	public @NotNull IconCoordinate getIcon(@Nullable Entity entity, ItemStack itemStack) {
+	@Override
+	public @NotNull IconCoordinate getIcon(@Nullable Entity entity, @NotNull ItemStack itemStack) {
 		return entity instanceof Player && itemStack == ((Player)entity).getHeldItem() && ((Player)entity).bobberEntity != null ? this.rodCast : this.rodDefault;
 	}
 }

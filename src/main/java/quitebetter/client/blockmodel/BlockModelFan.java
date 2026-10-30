@@ -3,13 +3,15 @@ package quitebetter.client.blockmodel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.block.model.BlockModelStandard;
-import net.minecraft.client.render.tessellator.Tessellator;
+import net.minecraft.client.render.tessellator.TessellatorGeneral;
 import net.minecraft.client.render.texture.stitcher.IconCoordinate;
 import net.minecraft.client.render.texture.stitcher.TextureRegistry;
 import net.minecraft.core.block.Block;
 import net.minecraft.core.block.BlockLogic;
 import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.util.helper.Side;
+import net.minecraft.core.world.WorldSource;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.NotNull;
 
 import static quitebetter.core.ModCore.MOD_ID;
@@ -38,6 +40,7 @@ public class BlockModelFan<T extends BlockLogic> extends BlockModelStandard<T> {
 		}
 	}
 
+	@Override
 	public IconCoordinate getBlockTextureFromSideAndMetadata(Side side, int data) {
 		Direction direction = this.getDirection(data);
 		if (direction == Direction.NONE) {
@@ -46,30 +49,31 @@ public class BlockModelFan<T extends BlockLogic> extends BlockModelStandard<T> {
 			IconCoordinate t;
 			switch (direction) {
 				case DOWN:
-					switch (side.getDirection()) {case DOWN:t=this.bottomTexture; break;  case UP:t=this.topTexture; break; default:t=this.sideInvTexture; break; }
+					switch (side.direction()) {case DOWN:t=this.bottomTexture; break;  case UP:t=this.topTexture; break; default:t=this.sideInvTexture; break; }
 					return t;
 				case UP:
-					switch (side.getDirection()) {case DOWN:t=this.topTexture; break;  case UP:t=this.bottomTexture; break; default:t=this.sideTexture; break; }
+					switch (side.direction()) {case DOWN:t=this.topTexture; break;  case UP:t=this.bottomTexture; break; default:t=this.sideTexture; break; }
 					return t;
 				case NORTH:
-					switch (side.getDirection()) {case NORTH:t=this.topTexture; break;  case SOUTH:t=this.bottomTexture; break; case EAST:case DOWN:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
+					switch (side.direction()) {case NORTH:t=this.topTexture; break;  case SOUTH:t=this.bottomTexture; break; case EAST:case DOWN:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
 					return t;
 				case EAST:
-					switch (side.getDirection()) {case EAST:t=this.topTexture; break;  case WEST:t=this.bottomTexture; break; case DOWN:case NORTH:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
+					switch (side.direction()) {case EAST:t=this.topTexture; break;  case WEST:t=this.bottomTexture; break; case DOWN:case NORTH:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
 					return t;
 				case SOUTH:
-					switch (side.getDirection()) {case SOUTH:t=this.topTexture; break;  case NORTH:t=this.bottomTexture; break; case EAST:case DOWN:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
+					switch (side.direction()) {case SOUTH:t=this.topTexture; break;  case NORTH:t=this.bottomTexture; break; case EAST:case DOWN:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
 					return t;
 				case WEST:
-					switch (side.getDirection()) {case WEST:t=this.topTexture; break;  case EAST:t=this.bottomTexture; break; case DOWN:case NORTH:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
+					switch (side.direction()) {case WEST:t=this.topTexture; break;  case EAST:t=this.bottomTexture; break; case DOWN:case NORTH:t=this.sideTexture; break; default:t=this.sideInvTexture; break; }
 					return t;
 				default: return this.bottomTexture;
 			}
 		}
 	}
 
-	public boolean render(Tessellator tessellator, int x, int y, int z) {
-		int meta = renderBlocks.blockAccess.getBlockMetadata(x, y, z);
+	@Override
+	public boolean render(TessellatorGeneral tessellator, WorldSource worldSource, TilePosc tilePos) {
+		int meta = worldSource.getBlockData(tilePos);
 		Direction direction = this.getDirection(meta);
 		switch (direction) {
 			case DOWN:
@@ -109,12 +113,12 @@ public class BlockModelFan<T extends BlockLogic> extends BlockModelStandard<T> {
 			default:
 				break;
 		}
-		this.renderStandardBlock(tessellator, this.block.getBounds(), x, y, z);
-		this.resetRenderBlocks();
+		renderBlocks.renderStandardBlock(tessellator, worldSource, this, this.block.getBounds(), tilePos);
+		renderBlocks.resetRenderBlocks();
 		return true;
 	}
 
 	public Direction getDirection(int data) {
-		return Direction.getDirectionById(data & MASK_DIRECTION);
+		return Direction.fromId(data & MASK_DIRECTION);
 	}
 }
