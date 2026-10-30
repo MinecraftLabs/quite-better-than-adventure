@@ -1,6 +1,6 @@
 package quitebetter.core.crafting;
 
-import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.WeightedRandomLootObject;
 import net.minecraft.core.data.registry.recipe.RecipeGroup;
 import net.minecraft.core.data.registry.recipe.RecipeSymbol;
@@ -62,7 +62,7 @@ public class ModRecipes {
 			.addInput('$', Items.ROPE)
 			.create("hook_craft", new ItemStack(ModItems.CLIMBING_HOOK));
 		//STEEL FISHING ROD
-		if (!FabricLoaderImpl.INSTANCE.isModLoaded("stardew")) {
+		if (!FabricLoader.getInstance().isModLoaded("stardew")) {
 			RecipeBuilder.Shaped(MOD_ID,
 					"  #", " #@", "# @")
 				.addInput('#', Items.INGOT_STEEL)

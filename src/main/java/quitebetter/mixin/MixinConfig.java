@@ -1,6 +1,6 @@
 package quitebetter.mixin;
 
-import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -21,7 +21,7 @@ public class MixinConfig implements IMixinConfigPlugin {
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (targetClassName.equals("net.minecraft.core.entity.EntityFishingBobber")) {
-			return !FabricLoaderImpl.INSTANCE.isModLoaded("stardew");
+			return !FabricLoader.getInstance().isModLoaded("stardew");
 		}
 		return true;
 	}

@@ -1,11 +1,13 @@
 package quitebetter.core.item;
 
-import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import quitebetter.core.ModConfig;
 import quitebetter.core.block.ModBlocks;
 import net.minecraft.core.item.*;
 import net.minecraft.core.item.tag.ItemTags;
 import turniplabs.halplibe.helper.ItemBuilder;
+import turniplabs.halplibe.helper.creativeInventory.CreativeInventoryCategory;
+import turniplabs.halplibe.helper.creativeInventory.CreativeInventoryPlacement;
 
 import static quitebetter.core.ModCore.MOD_ID;
 
@@ -41,6 +43,7 @@ public class ModItems {
 		//CLIMBING HOOK
 
 		CLIMBING_HOOK = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.setStackSize(1)
 			.setMaxDamage(250)
 			.build(
@@ -53,6 +56,7 @@ public class ModItems {
 
 		//WRENCH
 		WRENCH = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.setStackSize(1)
 			.build(
 				new ItemWrench(
@@ -64,6 +68,7 @@ public class ModItems {
 
 		//META WRENCH
 		META_WRENCH = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.setStackSize(1)
 			.build(
 				new ItemMetaWrench(
@@ -75,6 +80,7 @@ public class ModItems {
 
 		//SEASHELL
 		SEASHELL = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.build(
 				new ItemSeashell(
 					name("seashell"),
@@ -85,6 +91,7 @@ public class ModItems {
 
 		//STEEL FISHING ROD
 		TOOL_STEEL_FISHINGROD = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(FabricLoader.getInstance().isModLoaded("stardew") ? null : misc())
 			.setStackSize(1)
 			.build(
 				new ItemFishingRod(
@@ -93,12 +100,13 @@ public class ModItems {
 					id("TOOL_STEEL_FISHINGROD")
 				)
 			);
-		if (FabricLoaderImpl.INSTANCE.isModLoaded("stardew")) {
+		if (FabricLoader.getInstance().isModLoaded("stardew")) {
 			TOOL_STEEL_FISHINGROD = TOOL_STEEL_FISHINGROD.withTags(ItemTags.NOT_IN_CREATIVE_MENU);
 		}
 
 		//PEDESTAL
 		PEDESTAL = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.build(
 				new ItemPlaceable(
 					name("pedestal"),
@@ -109,6 +117,7 @@ public class ModItems {
 			);
 		//AMMO ARROW TORCH
 		AMMO_ARROW_TORCH = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.build(
 				new ItemArrowTorch(
 					name("ammo_arrow_torch"),
@@ -119,6 +128,7 @@ public class ModItems {
 
 		//SACK
 		SACK = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.build(
 				new ItemSack(
 					name("sack"),
@@ -126,5 +136,9 @@ public class ModItems {
 					id("SACK")
 				)
 			);
+	}
+
+	private static CreativeInventoryPlacement misc() {
+		return new CreativeInventoryPlacement.Category(CreativeInventoryCategory.MISCELLANEOUS);
 	}
 }

@@ -22,19 +22,7 @@
 		"main": [
 			"quitebetter.core.ModCore"
 		],
-		"beforeGameStart": [
-			"quitebetter.core.ModCore"
-		],
-		"afterGameStart": [
-			"quitebetter.core.ModCore"
-		],
-		"recipesReady": [
-			"quitebetter.core.ModCore"
-		],
-		"initModels": [
-			"quitebetter.client.ModClient"
-		],
-		"afterClientStart": [
+		"client": [
 			"quitebetter.client.ModClient"
 		],
 		"btwaila": [
@@ -53,6 +41,7 @@
 		"java": ">=${java}"
 	},
 	"suggests": {
-		"modmenu": ">=${modmenu}"
+		"modmenu": ">=${modmenu}",
+		"btwaila": ">=${btwaila}"
 	}
 }
