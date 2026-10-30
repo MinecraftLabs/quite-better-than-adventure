@@ -1,37 +1,27 @@
 package quitebetter.core.projectile;
 
-import net.minecraft.client.gui.modelviewer.categories.entries.entity.EntityEntryCreeper;
 import net.minecraft.core.block.BlockLogicTNT;
 import net.minecraft.core.block.Blocks;
-import net.minecraft.core.entity.EntityPrimedTNT;
-import net.minecraft.core.entity.monster.MobCreeper;
-import net.minecraft.core.entity.projectile.ProjectileArrowPurple;
-import net.minecraft.core.util.phys.AABB;
-import net.minecraft.core.util.phys.Vec3;
-import quitebetter.core.block.ModBlocks;
-import quitebetter.core.item.ModItems;
 import net.minecraft.core.block.tag.BlockTags;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.EntityItem;
+import net.minecraft.core.entity.EntityPrimedTNT;
 import net.minecraft.core.entity.Mob;
 import net.minecraft.core.entity.projectile.ProjectileArrow;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
 import net.minecraft.core.util.phys.HitResult;
 import net.minecraft.core.world.World;
-import quitebetter.core.util.BaseUtil;
-
-import static quitebetter.core.ModCore.LOGGER;
+import net.minecraft.core.world.pos.TilePos;
+import quitebetter.core.block.ModBlocks;
+import quitebetter.core.item.ModItems;
 
 public class ProjectileArrowTorch extends ProjectileArrow {
 
 	public ProjectileArrowTorch(World world, Mob entityliving, boolean doesArrowBelongToPlayer) {
 		super(world, entityliving, doesArrowBelongToPlayer, 0);
 		this.mobsHit = 0;
-		this.xTile = -1;
-		this.yTile = -1;
-		this.zTile = -1;
-		this.inTile = 0;
+		this.inTile = Blocks.AIR;
 		this.shake = 0;
 		this.inData = 0;
 		this.stack = new ItemStack(Items.AMMO_ARROW);
@@ -44,10 +34,7 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 	public ProjectileArrowTorch(World world, double x, double y, double z) {
 		super(world, x, y, z, 0);
 		this.mobsHit = 0;
-		this.xTile = -1;
-		this.yTile = -1;
-		this.zTile = -1;
-		this.inTile = 0;
+		this.inTile = Blocks.AIR;
 		this.shake = 0;
 		this.inData = 0;
 		this.stack = new ItemStack(Items.AMMO_ARROW);
@@ -61,55 +48,59 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 	public void tick() {
 		super.tick();
 		if (this.tickCount > 1 && this.tickCount % 3 == 0) {
-			world.spawnParticle("flame", this.x, this.y, this.z, 0, 0, 0, 0);
+			world.spawnParticle("flame", this.x, this.y, this.z, 0, 0, 0, 0, false);
 		}
 	}
 
 	@Override
 	public void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (hitResult.entity != null) {
-			hitResult.entity.remainingFireTicks = 25;
+		if (hitResult instanceof HitResult.Entity hitEntity) {
+			hitEntity.entity.remainingFireTicks = 25;
 			world.playSoundAtEntity((Entity)null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
-			if (hitResult.entity instanceof EntityPrimedTNT) {
-				((EntityPrimedTNT) hitResult.entity).fuse = 0;
+			if (hitEntity.entity instanceof EntityPrimedTNT tnt) {
+				tnt.fuse = 0;
 			}
 		}
 	}
 
+	@Override
 	protected void inGroundAction() {
 		this.remove();
 		boolean spawned = false;
 		int x;
 		int y;
 		int z;
+		TilePos tilePos = this.tilePos;
 		//CENTERED
-		x = this.xTile;
-		y = this.yTile;
-		z = this.zTile;
+		x = tilePos.x;
+		y = tilePos.y;
+		z = tilePos.z;
+		TilePos pos = new TilePos(x, y, z);
 		//TNT BLOCK
-		if (world.getBlock(x,y,z)!=null && world.getBlock(x,y,z).equals(Blocks.TNT)) {
-			((BlockLogicTNT) world.getBlock(x,y,z).getLogic()).ignite(world,x,y,z,true);
+		if (world.getBlockType(pos)!=null && world.getBlockType(pos).equals(Blocks.TNT)) {
+			((BlockLogicTNT) world.getBlockType(pos).getLogic()).ignite(world,pos,true);
 			return;
 		}
-		if (this.yTile<(int) this.y) {
+		if (tilePos.y<(int) this.y) {
 			y=(int)this.y;
-		} else if (this.xTile<(int) this.x) {
+		} else if (tilePos.x<(int) this.x) {
 			x=(int)this.x;
-		} else if (this.xTile>(int) this.x) {
+		} else if (tilePos.x>(int) this.x) {
 			x=(int)this.x;
-		} else if (this.zTile<(int) this.z) {
-			z=this.zTile+1;
-		} else if (this.zTile>=(int) this.z) {
-			z=this.zTile-1;
+		} else if (tilePos.z<(int) this.z) {
+			z=tilePos.z+1;
+		} else if (tilePos.z>=(int) this.z) {
+			z=tilePos.z-1;
 		}
 
-		if (world.getBlock(x, y, z) == null || (world.getBlock(x, y, z).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlock(x, y, z).hasTag(BlockTags.IS_LAVA)) && !(world.getBlock(x, y, z).hasTag(BlockTags.IS_WATER)) )) {
-			if (ModBlocks.ARROW_TORCH.canPlaceBlockAt(world,x,y,z)) {
-				world.setBlock(x, y, z, ModBlocks.ARROW_TORCH.id());
+		pos.set(x, y, z);
+		if (world.getBlockType(pos) == null || (world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
+			if (ModBlocks.ARROW_TORCH.canPlaceAt(world,pos)) {
+				world.setBlockType(pos, ModBlocks.ARROW_TORCH);
 				world.playSoundAtEntity((Entity)null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 				for (int i=1; i < 5; i++) {
-					world.spawnParticle("smoke", x+0.5, y+0.5, z+0.5, random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), 0);
+					world.spawnParticle("smoke", x+0.5, y+0.5, z+0.5, random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), 0, false);
 				}
 				spawned = true;
 			}
@@ -122,12 +113,13 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 						x = (int) (this.x + xi);
 						y = (int) (this.y + yi);
 						z = (int) (this.z + zi);
-						if (world.getBlock(x, y, z) == null || (world.getBlock(x, y, z).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlock(x, y, z).hasTag(BlockTags.IS_LAVA)) && !(world.getBlock(x, y, z).hasTag(BlockTags.IS_WATER)) )) {
-							if (ModBlocks.ARROW_TORCH.canPlaceBlockAt(world, x, y, z)) {
-								world.setBlock(x, y, z, ModBlocks.ARROW_TORCH.id());
+						pos.set(x, y, z);
+						if (world.getBlockType(pos) == null || (world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
+							if (ModBlocks.ARROW_TORCH.canPlaceAt(world, pos)) {
+								world.setBlockType(pos, ModBlocks.ARROW_TORCH);
 								world.playSoundAtEntity((Entity) null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 								for (int i = 1; i < 5; i++) {
-									world.spawnParticle("smoke", x + 0.5, y + 0.5, z + 0.5, random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), 0);
+									world.spawnParticle("smoke", x + 0.5, y + 0.5, z + 0.5, random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), 0, false);
 								}
 								spawned = true;
 								break out;

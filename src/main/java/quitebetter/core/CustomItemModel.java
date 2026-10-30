@@ -8,7 +8,10 @@ import java.awt.*;
 
 public class CustomItemModel extends ItemModelStandard {
 	public CustomItemModel(Item item, String namespace) {
-		super(item, namespace);
+		super(item, false);
+		if (namespace != null) {
+			this.setIcon(namespace + ":item/" + item.getKey().substring("item.".length()).replace(".", "_"));
+		}
 	}
 	@Override
 	public int getColor(ItemStack stack) {

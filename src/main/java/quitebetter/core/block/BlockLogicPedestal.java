@@ -11,6 +11,8 @@ import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.WorldSource;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -22,12 +24,13 @@ public class BlockLogicPedestal extends BlockLogic {
 		block.withEntity(TileEntityPedestal::new);
 	}
 
-	public boolean onBlockRightClicked(World world, int x, int y, int z, Player player, Side side, double xPlaced, double yPlaced) {
-		TileEntityPedestal tile = (TileEntityPedestal)world.getTileEntity(x, y, z);
+	@Override
+	public boolean onInteracted(World world, TilePosc tilePos, Player player, Side side, double xPlaced, double yPlaced) {
+		TileEntityPedestal tile = (TileEntityPedestal)world.getTileEntity(tilePos);
 		ItemStack heldItem = player.getHeldItem();
 		boolean flag = tile.setDisplayItem(player, heldItem);
 		if (heldItem != null && heldItem.stackSize <= 0) {
-			player.inventory.setItem(player.inventory.getCurrentItemIndex(), (ItemStack)null);
+			player.inventory.setItem(player.inventory.getCurrentSlot(), (ItemStack)null);
 		}
 
 		return flag;
@@ -54,55 +57,65 @@ public class BlockLogicPedestal extends BlockLogic {
 		return Blocks.solid[blockId] || Arrays.asList(excepts).contains(Blocks.getBlock(blockId));
 	}
 
-	public boolean canBlockStay(World world, int x, int y, int z) {
-		if (y >= 0 && y < world.getHeightBlocks()) {
-			return this.mayPlaceOn(world.getBlockId(x, y - 1, z));
+	@Override
+	public boolean canStay(World world, TilePosc tilePos) {
+		if (tilePos.y() >= 0 && tilePos.y() < world.getHeightBlocks()) {
+			return this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())).id());
 		} else {
 			return false;
 		}
 	}
 
-	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return super.canPlaceBlockAt(world, x, y, z) && this.mayPlaceOn(world.getBlockId(x, y - 1, z));
+	@Override
+	public boolean canPlaceAt(World world, TilePosc tilePos) {
+		return super.canPlaceAt(world, tilePos) && this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())).id());
 	}
 
-	public void onNeighborBlockChange(World world, int x, int y, int z, int blockId) {
-		super.onNeighborBlockChange(world, x, y, z, blockId);
-		if (!this.canBlockStay(world, x, y, z)) {
-			this.dropBlockWithCause(world, EnumDropCause.WORLD, x, y, z, world.getBlockMetadata(x, y, z), (TileEntity)null, (Player)null);
-			world.setBlockWithNotify(x, y, z, 0);
+	@Override
+	public void onNeighborChanged(World world, TilePosc tilePos, Block<?> block) {
+		super.onNeighborChanged(world, tilePos, block);
+		if (!this.canStay(world, tilePos)) {
+			this.dropWithCause(world, EnumDropCause.WORLD, tilePos, world.getBlockData(tilePos), (TileEntity)null, (Player)null);
+			world.setBlockTypeNotify(tilePos, Blocks.AIR);
 		}
 	}
 
+	@Override
 	public boolean isCubeShaped() {
 		return false;
 	}
 
+	@Override
 	public boolean isSolidRender() {
 		return false;
 	}
 
-	public boolean getSignal(WorldSource worldSource, int x, int y, int z, Side side) {
-		return ((TileEntityPedestal) worldSource.getTileEntity(x,y,z)).displayItem != null;
+	@Override
+	public boolean isEmittingSignal(WorldSource worldSource, TilePosc tilePos, Side side) {
+		return ((TileEntityPedestal) worldSource.getTileEntity(tilePos)).displayItem != null;
 	}
 
+	@Override
 	public ItemStack @Nullable [] getBreakResult(World world, EnumDropCause dropCause, int meta, TileEntity tileEntity) {
 		return new ItemStack[]{new ItemStack(ModItems.PEDESTAL)};
 	}
 
-	public static void updateNeighbours(World world, int x, int y, int z, Block block) {
-		world.notifyBlocksOfNeighborChange(x, y - 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x, y + 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x - 1, y, z, block.id());
-		world.notifyBlocksOfNeighborChange(x + 1, y, z, block.id());
-		world.notifyBlocksOfNeighborChange(x, y, z - 1, block.id());
-		world.notifyBlocksOfNeighborChange(x, y, z + 1, block.id());
+	public static void updateNeighbours(World world, TilePosc tilePos, Block block) {
+		int x = tilePos.x();
+		int y = tilePos.y();
+		int z = tilePos.z();
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y - 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y + 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x - 1, y, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x + 1, y, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y, z - 1), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y, z + 1), block);
 
-		world.notifyBlocksOfNeighborChange(x, y - 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x, y - 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x - 1, y - 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x + 1, y - 1, z, block.id());
-		world.notifyBlocksOfNeighborChange(x, y - 1, z - 1, block.id());
-		world.notifyBlocksOfNeighborChange(x, y - 1, z + 1, block.id());
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y - 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y - 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x - 1, y - 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x + 1, y - 1, z), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y - 1, z - 1), block);
+		world.notifyBlocksOfNeighborChange(new TilePos(x, y - 1, z + 1), block);
 	}
 }

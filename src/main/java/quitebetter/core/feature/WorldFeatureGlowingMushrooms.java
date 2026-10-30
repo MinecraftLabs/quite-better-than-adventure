@@ -5,6 +5,7 @@ import net.minecraft.core.world.biome.Biome;
 import net.minecraft.core.world.biome.Biomes;
 import quitebetter.core.block.ModBlocks;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePos;
 
 import java.util.*;
 
@@ -25,12 +26,16 @@ public class WorldFeatureGlowingMushrooms {
 				int i1 = x + random.nextInt(8) - random.nextInt(8);
 				int j1 = y + random.nextInt(4) - random.nextInt(4);
 				int k1 = z + random.nextInt(8) - random.nextInt(8);
-				if (world.isAirBlock(i1, j1, k1)) {
+				TilePos airPos = new TilePos(i1, j1, k1);
+				if (world.isAirBlock(airPos)) {
 					int l1 = 1 + random.nextInt(random.nextInt(3) + 1);
+					TilePos treePos = new TilePos(x, y, z);
+					TilePos placePos = new TilePos();
 
 					for(int i2 = 0; i2 < l1; ++i2) {
-						if ((world.getBlock(x,y,z)==null || world.getBlock(x,y,z).hasTag(BlockTags.PLACE_OVERWRITES)) && ModBlocks.MUSHROOM_GLOWING.canBlockStay(world, i1, j1 + i2, k1)) {
-							world.setBlock(i1, j1 + i2, k1, ModBlocks.MUSHROOM_GLOWING.id());
+						placePos.set(i1, j1 + i2, k1);
+						if ((world.getBlockType(treePos)==null || world.getBlockType(treePos).hasTag(BlockTags.PLACE_OVERWRITES)) && ModBlocks.MUSHROOM_GLOWING.canStay(world, placePos)) {
+							world.setBlockType(placePos, ModBlocks.MUSHROOM_GLOWING);
 						}
 					}
 				}

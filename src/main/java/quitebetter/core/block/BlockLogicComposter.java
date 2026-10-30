@@ -8,6 +8,7 @@ import net.minecraft.core.item.Item;
 import net.minecraft.core.item.Items;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -27,17 +28,20 @@ public class BlockLogicComposter extends BlockLogic {
 		return Arrays.asList(Compostables).contains(Item.getItem(item.id));
 	}
 
+	@Override
 	public int tickDelay() {
 		return 0;
 	}
 
-	public void updateTick(World world, int x, int y, int z, Random rand) {
+	@Override
+	public void updateTick(World world, TilePosc tilePos, Random rand, boolean isRandomTick) {
 
 	}
 
-	public boolean onBlockRightClicked(World world, int x, int y, int z, Player player, Side side, double xPlaced, double yPlaced) {
+	@Override
+	public boolean onInteracted(World world, TilePosc tilePos, Player player, Side side, double xPlaced, double yPlaced) {
 		if (BlockLogicComposter.isCompostable( player.getHeldItem().getItem() )) {
-			world.spawnParticle("smoke", x+0.5, y+0.5, z+0.5, 0.0D, 0.1D, 0.0D, 0);
+			world.spawnParticle("smoke", tilePos.x()+0.5, tilePos.y()+0.5, tilePos.z()+0.5, 0.0D, 0.1D, 0.0D, 0, false);
 			player.getHeldItem().consumeItem(player);
 			return true;
 		}

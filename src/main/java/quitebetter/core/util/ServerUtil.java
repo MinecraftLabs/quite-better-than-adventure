@@ -11,28 +11,28 @@ import turniplabs.halplibe.helper.EnvironmentHelper;
 @Environment(EnvType.SERVER)
 public class ServerUtil {
 	public static PlayerList getPlayerList() {
-		if (EnvironmentHelper.isServerEnvironment()) {
+		if (EnvironmentHelper.isMultiplayerServer()) {
 			return MinecraftServer.getInstance().playerList;
 		}
 		return null;
 	}
 
 	public static void sendToWorldPlayers(World world, Packet packet) {
-		if (EnvironmentHelper.isServerEnvironment()) {
+		if (EnvironmentHelper.isMultiplayerServer()) {
 			assert ServerUtil.getPlayerList()!=null;
 			ServerUtil.getPlayerList().sendPacketToAllPlayersInDimension(packet, world.dimension.id);
 		}
 	}
 
 	public static void sendToAllPlayers(Packet packet) {
-		if (EnvironmentHelper.isServerEnvironment()) {
+		if (EnvironmentHelper.isMultiplayerServer()) {
 			assert ServerUtil.getPlayerList()!=null;
 			ServerUtil.getPlayerList().sendPacketToAllPlayers(packet);
 		}
 	}
 
 	public static void markBlockNeedsUpdate(World world, int x, int y, int z) {
-		if (EnvironmentHelper.isServerEnvironment()) {
+		if (EnvironmentHelper.isMultiplayerServer()) {
 			assert ServerUtil.getPlayerList()!=null;
 			ServerUtil.getPlayerList().markBlockNeedsUpdate(x,y,z,world.dimension.id);
 		}

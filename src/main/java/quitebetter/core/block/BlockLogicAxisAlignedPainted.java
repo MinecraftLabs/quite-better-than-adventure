@@ -8,6 +8,7 @@ import net.minecraft.core.block.material.Material;
 import net.minecraft.core.util.helper.Axis;
 import net.minecraft.core.util.helper.DyeColor;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 
 public class BlockLogicAxisAlignedPainted extends BlockLogic implements IPainted {
 	public BlockLogicAxisAlignedPainted(Block<?> block, Material material) {
@@ -42,5 +43,5 @@ public class BlockLogicAxisAlignedPainted extends BlockLogic implements IPainted
 	}
 
 	@Override
-	public void removeDye(World world, int i, int j, int k) {}
+	public void removeDye(World world, TilePosc tilePos) {}
 }

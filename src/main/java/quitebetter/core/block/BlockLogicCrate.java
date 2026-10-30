@@ -27,6 +27,8 @@ import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.DyeColor;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 import quitebetter.core.util.ServerUtil;
 import turniplabs.halplibe.helper.EnvironmentHelper;
@@ -49,17 +51,19 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 
 	//ACTIVATOR
 
-	public void onActivatorInteract(World world, int x, int y, int z, TileEntityActivator activator, Direction direction) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
-		Block front = world.getBlock(x+direction.getOffsetX(),y+direction.getOffsetY(),z+direction.getOffsetZ());
-		TileEntity frontTile = world.getTileEntity(x+direction.getOffsetX(),y+direction.getOffsetY(),z+direction.getOffsetZ());
+	@Override
+	public void onActivatorInteracted(World world, TilePosc tilePos, TileEntityActivator activator, Direction direction) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
+		TilePos frontPos = tilePos.add(direction, new TilePos());
+		Block front = world.getBlockType(frontPos);
+		TileEntity frontTile = world.getTileEntity(frontPos);
 		if (tile!=null) {
 			ItemStack activeStack = activator.getItem(activator.stackSelector);
 			if (tile.hasItemData()) {
 				if (TileEntityCrate.canUseToTake(activeStack) && (front==null || front.hasTag(BlockTags.PLACE_OVERWRITES) || front.equals(Blocks.MESH))) {
 					ItemStack stack = tile.takeStack();
 					if (stack!=null) {
-						world.entityJoinedWorld(new EntityItem(world, x+direction.getOffsetX(),y+direction.getOffsetY(),z+direction.getOffsetZ(), stack));
+						world.entityJoinedWorld(new EntityItem(world, frontPos.x(),frontPos.y(),frontPos.z(), stack));
 					}
 				}
 			}
@@ -69,14 +73,14 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	//BREAKING
 
 	@Override
-	public boolean preventsBreaking(World world, int x, int y, int z, Player player, Side side) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
+	public boolean preventsBreaking(World world, TilePosc tilePos, Player player, Side side) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		return tile!=null && !tile.glued && tile.itemID !=null && !player.isSneaking();
 	}
 
 	@Override
-	public void onBlockLeftClicked(World world, int x, int y, int z, Player player, Side side) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
+	public void onBlockLeftClicked(World world, TilePosc tilePos, Player player, Side side) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		if (tile!=null && (player.getHeldItem()==null || TileEntityCrate.canUseToTake(player.getHeldItem())) ) {
 			ItemStack stack = tile.takeStack();
 			if (stack != null) {
@@ -90,16 +94,16 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	//INTERACTION
 
 	@Override
-	public boolean preventsInteraction(World world, int x, int y, int z, Player player, Side side) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
+	public boolean preventsInteraction(World world, TilePosc tilePos, Player player, Side side) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		return tile!=null && !tile.glued && (tile.itemID !=null || player.getHeldItem()!=null && player.getHeldItem().getItem().equals(Items.SLIMEBALL) || !player.isSneaking()) && (player.getHeldItem()!=null && TileEntityCrate.canUseToTake(player.getHeldItem()));
 	}
 
 	@Override
-	public void onBlockRightClicked(World world, int x, int y, int z, Player player, Side side) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x, y, z);
+	public void onBlockRightClicked(World world, TilePosc tilePos, Player player, Side side) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		if (tile != null) {
-			if (EnvironmentHelper.isSinglePlayer() || EnvironmentHelper.isServerEnvironment()) {
+			if (EnvironmentHelper.isSingleplayerClient() || EnvironmentHelper.isMultiplayerServer()) {
 				tile.pushItems(player);
 			} else {
 				if (!tile.glued) {
@@ -123,8 +127,8 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, int blockId) {
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
+	public void onNeighborChanged(World world, TilePosc tilePos, Block<?> block) {
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		if (tile!=null) {
 			tile.updateStorageHeights();
 			tile.takeOutOfBasket();
@@ -134,9 +138,9 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	//COLOR
 
 	@Override
-	public void setColor(World world, int x, int y, int z, DyeColor color) {
-		world.setBlockRaw(x, y, z, ModBlocks.CRATE_PAINTED.id());
-		((BlockLogicCratePainted)ModBlocks.CRATE_PAINTED.getLogic()).setColor(world, x, y, z, color);
-		world.notifyBlockChange(x,y,z,block.id());
+	public void setColor(World world, TilePosc tilePos, DyeColor color) {
+		world.setBlockTypeRaw(tilePos, ModBlocks.CRATE_PAINTED);
+		((BlockLogicCratePainted)ModBlocks.CRATE_PAINTED.getLogic()).setColor(world, tilePos, color);
+		world.notifyBlockChange(tilePos,block);
 	}
 }

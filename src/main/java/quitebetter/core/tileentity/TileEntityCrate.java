@@ -1,38 +1,35 @@
 package quitebetter.core.tileentity;
 
 import com.mojang.nbt.tags.CompoundTag;
-import net.minecraft.client.render.block.model.BlockModelBasket;
-import net.minecraft.core.block.Block;
-import net.minecraft.core.block.Blocks;
-import net.minecraft.core.block.motion.CarriedBlock;
-import net.minecraft.core.block.tag.BlockTags;
-import net.minecraft.core.entity.Mob;
-import net.minecraft.core.net.packet.PacketBlockUpdate;
-import net.minecraft.core.net.packet.PacketContainerSetSlot;
-import net.minecraft.core.net.packet.PacketTileEntityData;
-import net.minecraft.core.util.helper.BlockParticleHelper;
-import net.minecraft.core.util.helper.Side;
-import net.minecraft.server.entity.player.PlayerServer;
-import quitebetter.core.block.BlockLogicCrate;
-import quitebetter.core.item.ModItems;
-import quitebetter.core.util.BaseUtil;
-import quitebetter.core.util.PlayerUtil;
-import net.minecraft.core.block.entity.TileEntityBasket;
+import net.minecraft.core.block.entity.TileEntity;
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
 import net.minecraft.core.item.block.ItemBlock;
+import net.minecraft.core.net.packet.Packet;
+import net.minecraft.core.net.packet.PacketTileEntityData;
+import net.minecraft.core.player.gamemode.Gamemodes;
 import net.minecraft.core.sound.SoundCategory;
+import net.minecraft.core.util.helper.BlockParticleHelper;
+import net.minecraft.core.util.helper.Side;
+import net.minecraft.core.world.ICarriable;
+import net.minecraft.core.world.ICarrySource;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
-import quitebetter.core.util.ServerUtil;
-import turniplabs.halplibe.helper.EnvironmentHelper;
+import quitebetter.core.block.BlockLogicCrate;
+import quitebetter.core.item.ModItems;
+import quitebetter.core.util.BaseUtil;
+import quitebetter.core.util.IBasketContents;
+import quitebetter.core.util.PlayerUtil;
+import net.minecraft.core.block.entity.TileEntityBasket;
+import net.minecraft.core.entity.player.Player;
 
 import java.util.*;
 
-public class TileEntityCrate extends TileEntityGlued {
+public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 	public final static int maxSlots = 48;
 	public final static int maxCrates = 8;
 	public Integer maxItemCount; //Max item amount in single instance
@@ -46,12 +43,13 @@ public class TileEntityCrate extends TileEntityGlued {
 
 	private boolean isCrateConnectable(int yo) {
 		assert worldObj != null;
+		TilePos pos = new TilePos(tilePos.x, yo, tilePos.z);
 		return (
-			worldObj.getBlock(x, yo, z) != null &&
-				worldObj.getBlock(x, yo, z).id() == worldObj.getBlock(x, y, z).id() &&
-				worldObj.getBlockMetadata(x, yo, z) == worldObj.getBlockMetadata(x, y, z) &&
-				worldObj.getTileEntity(x, yo, z) != null &&
-				!((TileEntityCrate) worldObj.getTileEntity(x, yo, z)).glued
+			worldObj.getBlockType(pos) != null &&
+				worldObj.getBlockType(pos).id() == worldObj.getBlockType(tilePos).id() &&
+				worldObj.getBlockData(pos) == worldObj.getBlockData(tilePos) &&
+				worldObj.getTileEntity(pos) != null &&
+				!((TileEntityCrate) worldObj.getTileEntity(pos)).glued
 		);
 	}
 
@@ -95,9 +93,9 @@ public class TileEntityCrate extends TileEntityGlued {
 				for (int j = 0; j < 5; ++j) {
 					BaseUtil.spawnParticle(worldObj,
 						"block",
-						this.x + rand.nextFloat(),
-						this.y + rand.nextFloat(),
-						this.z + rand.nextFloat(),
+						this.tilePos.x + rand.nextFloat(),
+						this.tilePos.y + rand.nextFloat(),
+						this.tilePos.z + rand.nextFloat(),
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
@@ -107,9 +105,9 @@ public class TileEntityCrate extends TileEntityGlued {
 				for (int j = 0; j < 5; ++j) {
 					BaseUtil.spawnParticle(worldObj,
 						"item",
-						this.x + rand.nextFloat(),
-						this.y + rand.nextFloat(),
-						this.z + rand.nextFloat(),
+						this.tilePos.x + rand.nextFloat(),
+						this.tilePos.y + rand.nextFloat(),
+						this.tilePos.z + rand.nextFloat(),
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
@@ -118,7 +116,7 @@ public class TileEntityCrate extends TileEntityGlued {
 			}
 		} else {
 			for (int j = 0; j < 3; ++j) {
-				BaseUtil.spawnParticle(worldObj, "smoke", this.x + rand.nextFloat(), this.y + rand.nextFloat(), this.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, 0);
+				BaseUtil.spawnParticle(worldObj, "smoke", this.tilePos.x + rand.nextFloat(), this.tilePos.y + rand.nextFloat(), this.tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, 0);
 			}
 		}
 	}
@@ -128,10 +126,10 @@ public class TileEntityCrate extends TileEntityGlued {
 	public void emitSound(boolean success) {
 		assert worldObj != null;
 		if (success) {
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, x, y, z, "random.equip", 0.5F, 2F);
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, x, y, z, "step.wood", 0.5F, 0.5F);
+			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "random.equip", 0.5F, 2F);
+			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 0.5F);
 		} else {
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, x, y, z, "step.wood", 0.5F, 2F);
+			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 2F);
 		}
 	}
 
@@ -155,8 +153,9 @@ public class TileEntityCrate extends TileEntityGlued {
 		int out = 0;
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-			if (worldObj.getBlock(x, yi, z) != null && isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.hasItemData()) {
 					out += tile.maxItemCount;
 					out -= tile.itemCount;
@@ -171,8 +170,9 @@ public class TileEntityCrate extends TileEntityGlued {
 		int out = 0;
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-			if (worldObj.getBlock(x, yi, z) != null && isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.maxItemCount != null) {
 					out += tile.maxItemCount;
 				}
@@ -186,8 +186,9 @@ public class TileEntityCrate extends TileEntityGlued {
 		int out = 0;
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-			if (worldObj.getBlock(x, yi, z) != null && isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.itemCount != null) {
 					out += tile.itemCount;
 				}
@@ -203,17 +204,17 @@ public class TileEntityCrate extends TileEntityGlued {
 
 	public TileEntityCrate getHighestCrate() {
 		assert worldObj != null;
-		return (TileEntityCrate) worldObj.getTileEntity(x,upperHeight,z);
+		return (TileEntityCrate) worldObj.getTileEntity(new TilePos(tilePos.x, upperHeight, tilePos.z));
 	}
 
 	//HEIGHTS
 
 	public void checkStorageHeights() {
 		if (this.upperHeight == null) {
-			this.upperHeight = this.y;
+			this.upperHeight = this.tilePos.y;
 		}
 		if (this.lowerHeight == null) {
-			this.lowerHeight = this.y;
+			this.lowerHeight = this.tilePos.y;
 		}
 	}
 
@@ -223,12 +224,12 @@ public class TileEntityCrate extends TileEntityGlued {
 		int yi;
 		boolean success;
 		//ADDING
-		yi = this.y;
+		yi = this.tilePos.y;
 		this.upperHeight = yi;
 		do {
 			success = false;
 			if (isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(new TilePos(tilePos.x, yi, tilePos.z));
 				if (!tile.hasItemData() || tile.hasEqualDataTo(this)) {
 					if (this.upperHeight - this.lowerHeight + 1 < maxCrates) {
 						success = true;
@@ -240,12 +241,12 @@ public class TileEntityCrate extends TileEntityGlued {
 			}
 			yi += 1;
 		} while (success);
-		yi = this.y;
+		yi = this.tilePos.y;
 		this.lowerHeight = yi;
 		do {
 			success = false;
 			if (isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(new TilePos(tilePos.x, yi, tilePos.z));
 				if (!tile.hasItemData() || tile.hasEqualDataTo(this)) {
 					if (this.upperHeight - this.lowerHeight + 1 < maxCrates) {
 						success = true;
@@ -262,8 +263,9 @@ public class TileEntityCrate extends TileEntityGlued {
 
 	public void notifyCrates() {
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
+			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
 			if (worldObj != null && isCrateConnectable(yi)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.hasEqualItemDataTo(this) || !tile.hasItemData()) {
 					this.passDataTo(tile);
 				}
@@ -290,44 +292,21 @@ public class TileEntityCrate extends TileEntityGlued {
 
 	//CARRYING
 
-	public boolean canBeCarried(World world, Entity potentialHolder) {
-		return true;
+	@Nullable
+	@Override
+	public ICarriable pickup(World world, Entity holder, TilePosc tilePos) {
+		return super.pickup(world, holder, tilePos);
 	}
 
+	@Override
 	public boolean tryPlace(World world, Entity holder, int blockX, int blockY, int blockZ, Side side, double xPlaced, double yPlaced) {
-		CarriedBlock carriedBlock = this.carriedBlock;
-		this.x = blockX + side.getOffsetX();
-		this.y = blockY + side.getOffsetY();
-		this.z = blockZ + side.getOffsetZ();
-		Block<?> currentBlock = world.getBlock(this.x, this.y, this.z);
-		if (currentBlock != null && !currentBlock.hasTag(BlockTags.PLACE_OVERWRITES)) {
-			return false;
-		} else {
-			assert carriedBlock != null;
-			world.setBlockAndMetadata(this.x, this.y, this.z, carriedBlock.blockId, carriedBlock.metadata);
-			this.upperHeight = null;
-			this.lowerHeight = null;
-			this.worldObj = world;
-			this.validate();
-			world.removeBlockTileEntity(this.x, this.y, this.z);
-			world.setTileEntity(this.x, this.y, this.z, this);
-			Block<?> b = world.getBlock(this.x, this.y, this.z);
-			if (b != null && holder instanceof Mob) {
-				b.onBlockPlacedByMob(world, this.x, this.y, this.z, side, (Mob) holder, xPlaced, yPlaced);
-			}
-
-			world.notifyBlockChange(this.x, this.y, this.z, carriedBlock.blockId);
-			if (carriedBlock.blockId != 0) {
-				if (Blocks.getBlock(carriedBlock.blockId).isSignalSource()) {
-					for (Side s : Side.sides) {
-						world.notifyBlocksOfNeighborChange(this.x + s.getOffsetX(), this.y + s.getOffsetY(), this.z + s.getOffsetZ(), this.getBlockId());
-					}
-				}
-			}
-			sendTilePacket(blockX, blockY, blockZ);
-
-			return true;
+		this.upperHeight = null;
+		this.lowerHeight = null;
+		boolean placed = super.tryPlace(world, holder, blockX, blockY, blockZ, side, xPlaced, yPlaced);
+		if (placed) {
+			this.setChanged();
 		}
+		return placed;
 	}
 
 	//INTERACTION
@@ -357,7 +336,8 @@ public class TileEntityCrate extends TileEntityGlued {
 			loop:
 			for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 				if (worldObj != null && isCrateConnectable(yi)) {
-					TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+					TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+					TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 					if (!tile.hasItemData() || tile.getFreeSpace() > 0) {
 						tile.itemID = stack.itemID;
 						tile.itemMeta = stack.getMetadata();
@@ -367,7 +347,7 @@ public class TileEntityCrate extends TileEntityGlued {
 						tile.itemCount += stack.stackSize - countcorr;
 						stack.stackSize = Math.max(countcorr, 0);
 						success = true;
-						sendTilePacket(x, yi, z);
+						sendTilePacket(pos);
 						if (stack.stackSize > 0) {
 							continue loop;
 						}
@@ -388,7 +368,7 @@ public class TileEntityCrate extends TileEntityGlued {
 	}
 
 	public void pushItems(Player player) {
-		ItemStack heldstack = player.getHeldItem();
+		ItemStack heldstack = player.getCurrentEquippedItem();
 		//INTERACTION
 		if (this.glued) {
 			return;
@@ -396,11 +376,11 @@ public class TileEntityCrate extends TileEntityGlued {
 		if (!this.hasItemData() && heldstack != null && heldstack.getItem().equals(Items.SLIMEBALL) && player.isSneaking()) {
 			Random rand = new Random();
 			for (int j = 0; j < 4; ++j) {
-				BaseUtil.spawnParticle(worldObj, "item", x + rand.nextFloat(), y + rand.nextFloat(), z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id);
+				BaseUtil.spawnParticle(worldObj, "item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id);
 			}
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, x, y, z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
+			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
 			this.glued = true;
-			sendTilePacket(x, y, z);
+			sendTilePacket(this.tilePos);
 			return;
 		}
 		//INIT
@@ -419,8 +399,8 @@ public class TileEntityCrate extends TileEntityGlued {
 			Integer index = PlayerUtil.findSlotInInventory(player, Item.getItem(this.itemID), this.itemMeta);
 			if (index != null) {
 				ItemStack stack = player.inventory.getItem(index);
-				pushStack(player.getGamemode().getId() == 1 ? stack.copy() : stack);
-				if (player.getGamemode().getId() != 1) {
+				pushStack(player.getGamemode() == Gamemodes.CREATIVE ? stack.copy() : stack);
+				if (player.getGamemode() != Gamemodes.CREATIVE) {
 					PlayerUtil.inventorySetSlot(player, index, (ItemStack) (
 						stack.stackSize > 0 ? stack : null
 					));
@@ -439,7 +419,8 @@ public class TileEntityCrate extends TileEntityGlued {
 					loop:
 					for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 						if (worldObj != null && isCrateConnectable(yi)) {
-							TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+							TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+							TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 							if (!tile.hasItemData() || tile.getFreeSpace() > 0) {
 								tile.itemID = stack.itemID;
 								tile.itemMeta = stack.getMetadata();
@@ -451,7 +432,7 @@ public class TileEntityCrate extends TileEntityGlued {
 								if (stack.stackSize > 0) {
 									continue loop;
 								}
-								sendTilePacket(x, yi, z);
+								sendTilePacket(pos);
 								tile.emitParticles(stack);
 								success = true;
 							}
@@ -488,14 +469,15 @@ public class TileEntityCrate extends TileEntityGlued {
 			return null;
 		}
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-			if (isCrateConnectable(yi) && worldObj.getTileEntity(x, yi, z) instanceof TileEntityCrate && (((TileEntityCrate) worldObj.getTileEntity(x, yi, z)).itemCount > 0)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(x, yi, z);
+			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
+			if (isCrateConnectable(yi) && worldObj.getTileEntity(pos) instanceof TileEntityCrate && (((TileEntityCrate) worldObj.getTileEntity(pos)).itemCount > 0)) {
+				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				int maxStackSize = (new ItemStack(tile.itemID, 1, tile.itemMeta)).getMaxStackSize();
 				int amount = Math.min(tile.itemCount, maxStackSize);
 				tile.itemCount -= amount;
 				ItemStack stack = new ItemStack(tile.itemID, amount, tile.itemMeta);
 				emitParticles(stack);
-				sendTilePacket(x, yi, z);
+				sendTilePacket(pos);
 				emitSound(true);
 				takeOutOfBasket();
 				return stack;
@@ -509,8 +491,8 @@ public class TileEntityCrate extends TileEntityGlued {
 	//NBT
 
 	@Override
-	public void readFromNBT(CompoundTag compoundTag) {
-		super.readFromNBT(compoundTag);
+	public void readAdditionalData(CompoundTag compoundTag) {
+		super.readAdditionalData(compoundTag);
 		if (Item.getItem(compoundTag.getInteger("ItemId")) != null) {
 			this.itemCount = compoundTag.getInteger("ItemCount");
 			this.itemID = compoundTag.getInteger("ItemId");
@@ -524,8 +506,8 @@ public class TileEntityCrate extends TileEntityGlued {
 	}
 
 	@Override
-	public void writeToNBT(CompoundTag compoundTag) {
-		super.writeToNBT(compoundTag);
+	public void writeAdditionalData(CompoundTag compoundTag) {
+		super.writeAdditionalData(compoundTag);
 		if (this.itemCount != null) {
 			compoundTag.putInt("ItemCount", this.itemCount);
 		}
@@ -551,36 +533,17 @@ public class TileEntityCrate extends TileEntityGlued {
 		if (tile.itemID!=null && tile.getFreeSpace()<=0) {
 			return;
 		}
-		if (this.worldObj.getTileEntity(tile.x, tile.y + 1, tile.z) != null && this.worldObj.getTileEntity(x, y + 1, z) instanceof TileEntityBasket) {
-			List<TileEntityBasket.BasketEntry> toRemove = new ArrayList();
-			TileEntityBasket basket = (TileEntityBasket) this.worldObj.getTileEntity(tile.x, tile.y + 1, tile.z);
-			if (basket.contents != null) {
-				for (Map.Entry<TileEntityBasket.BasketEntry, Integer> entry : basket.contents.entrySet()) {
-					if (entry != null) {
-						TileEntityBasket.BasketEntry basketEntry = (TileEntityBasket.BasketEntry) entry.getKey();
-						ItemStack stack = new ItemStack(basketEntry.id, (Integer) entry.getValue(), basketEntry.metadata, basketEntry.tag);
-						//PUSHING STACK
-						ItemStack stackcorr = tile.pushStack(stack);
-						if (stackcorr!=null) { //SUCCESS
-							if (stackcorr.stackSize>0) {
-								basket.numUnitsInside -= entry.getValue();
-								basket.numUnitsInside += stackcorr.stackSize;
-								entry.setValue(stackcorr.stackSize);
-							} else {
-								toRemove.add(basketEntry);
-								basket.numUnitsInside -= entry.getValue();
-							}
-							tile.updateStorageHeights();
-						}
-					}
+		TilePos basketPos = new TilePos(tile.tilePos.x, tile.tilePos.y + 1, tile.tilePos.z);
+		if (this.worldObj.getTileEntity(basketPos) != null && this.worldObj.getTileEntity(new TilePos(this.tilePos.x, this.tilePos.y + 1, this.tilePos.z)) instanceof TileEntityBasket) {
+			TileEntityBasket basket = (TileEntityBasket) this.worldObj.getTileEntity(basketPos);
+			((IBasketContents) basket).quitebetter$transferContents(stack -> {
+				ItemStack stackcorr = tile.pushStack(stack);
+				if (stackcorr != null) {
+					tile.updateStorageHeights();
 				}
-				//REMOVAL
-				for (TileEntityBasket.BasketEntry entry : toRemove) {
-					basket.contents.remove(entry);
-				}
-				tile.sendTilePacket(tile.x, tile.y + 1, tile.z);
-				tile.sendPacketsForCrates();
-			}
+				return stackcorr;
+			});
+			tile.sendPacketsForCrates();
 		}
 	}
 
@@ -594,28 +557,34 @@ public class TileEntityCrate extends TileEntityGlued {
 			this.glued = true;
 
 			for (int j = 0; j < 4; ++j) {
-				worldObj.spawnParticle("item", x + rand.nextFloat(), y + rand.nextFloat(), z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id);
+				worldObj.spawnParticle("item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id, false);
 			}
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, x, y, z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
+			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
 		}
 	}
 
 	//SERVER-SIDE
 
-	public void sendTilePacket(int x, int y, int z) {
-		assert worldObj != null;
-		if (EnvironmentHelper.isServerEnvironment() && worldObj.getTileEntity(x, y, z) != null) {
-			ServerUtil.sendToWorldPlayers(worldObj, new PacketTileEntityData(worldObj.getTileEntity(x, y, z)));
-			ServerUtil.sendToWorldPlayers(worldObj, new PacketBlockUpdate(x, y, z, worldObj));
+	public void sendTilePacket(TilePosc pos) {
+		if (worldObj != null && !worldObj.isClientSide) {
+			TileEntity tile = worldObj.getTileEntity(pos);
+			if (tile != null) {
+				tile.setChanged();
+			}
 		}
 	}
 
 	public void sendPacketsForCrates() {
-		if (EnvironmentHelper.isServerEnvironment() && this.upperHeight!=null && this.lowerHeight!=null) {
+		if (this.upperHeight!=null && this.lowerHeight!=null) {
 			assert worldObj != null;
 			for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-				sendTilePacket(x, yi, z);
+				sendTilePacket(new TilePos(tilePos.x, yi, tilePos.z));
 			}
 		}
+	}
+
+	@Override
+	public Packet getDescriptionPacket() {
+		return new PacketTileEntityData(this);
 	}
 }

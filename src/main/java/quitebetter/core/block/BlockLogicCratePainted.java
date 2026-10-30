@@ -7,6 +7,7 @@ import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.DyeColor;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 import quitebetter.core.tileentity.TileEntityCrate;
 
@@ -15,31 +16,36 @@ public class BlockLogicCratePainted extends BlockLogicCrate implements IPainted 
 		super(block, material);
 	}
 
-	public int getPlacedBlockMetadata(@Nullable Player player, ItemStack stack, World world, int x, int y, int z, Side side, double xPlaced, double yPlaced) {
+	@Override
+	public int getPlacedData(@Nullable Player player, ItemStack stack, World world, TilePosc tilePos, Side side, double xPlaced, double yPlaced) {
 		return stack.getMetadata() & 15;
 	}
 
+	@Override
 	public DyeColor fromMetadata(int meta) {
 		return DyeColor.colorFromBlockMeta(meta);
 	}
 
+	@Override
 	public int toMetadata(DyeColor color) {
 		return color.blockMeta;
 	}
 
+	@Override
 	public int stripColorFromMetadata(int meta) {
 		return 0;
 	}
 
-	public void removeDye(World world, int x, int y, int z) {
-		world.setBlockWithNotify(x, y, z, ModBlocks.CRATE.id());
+	@Override
+	public void removeDye(World world, TilePosc tilePos) {
+		world.setBlockTypeNotify(tilePos, ModBlocks.CRATE);
 	}
 
 	@Override
-	public void setColor(World world, int x, int y, int z, DyeColor color) {
-		world.setBlockMetadataWithNotify(x,y,z,toMetadata(color));
-		world.notifyBlockChange(x,y,z,block.id());
-		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(x,y,z);
+	public void setColor(World world, TilePosc tilePos, DyeColor color) {
+		world.setBlockDataNotify(tilePos,toMetadata(color));
+		world.notifyBlockChange(tilePos,block);
+		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		if (tile!=null) {
 			tile.updateStorageHeights();
 		}

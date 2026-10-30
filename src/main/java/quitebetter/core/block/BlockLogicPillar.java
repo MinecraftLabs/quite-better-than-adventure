@@ -9,5 +9,6 @@ public class BlockLogicPillar extends BlockLogicAxisAligned {
 		super(block, material);
 	}
 
+	@Override
 	public boolean isSolidRender() { return false; }
 }

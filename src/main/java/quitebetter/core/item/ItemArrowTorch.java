@@ -4,6 +4,7 @@ import quitebetter.core.projectile.ProjectileArrowTorch;
 import net.minecraft.core.item.IDispensable;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
+import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.world.World;
 
 import java.util.Random;
@@ -14,7 +15,10 @@ public class ItemArrowTorch extends Item implements IDispensable {
 	}
 
 	@Override
-	public void onDispensed(ItemStack itemStack, World world, double x, double y, double z, int xd, int yd, int zd, Random random) {
+	public void onDispensed(ItemStack itemStack, World world, Random random, Direction direction, double x, double y, double z) {
+		int xd = direction.offsetX();
+		int yd = direction.offsetY();
+		int zd = direction.offsetZ();
 		ProjectileArrowTorch arrow = new ProjectileArrowTorch(world, x, y, z);
 		arrow.xd = xd;
 		arrow.yd = yd;

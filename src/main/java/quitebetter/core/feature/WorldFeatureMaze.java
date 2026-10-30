@@ -15,7 +15,9 @@ import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.biome.Biome;
 import net.minecraft.core.world.biome.Biomes;
-import net.minecraft.core.world.generate.feature.WorldFeature;
+import net.minecraft.core.world.generate.feature.WorldFeatureInterface;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import quitebetter.core.block.ModBlocks;
 import quitebetter.core.item.ModItems;
 import quitebetter.core.util.WorldUtil;
@@ -24,9 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
 
-public class WorldFeatureMaze extends WorldFeature {
+public class WorldFeatureMaze implements WorldFeatureInterface {
 	private int wallBlockA;
 	private int wallBlockB;
 	private int floorBlock;
@@ -47,17 +48,20 @@ public class WorldFeatureMaze extends WorldFeature {
 	};
 
 	private void setBlock(World world, int x, int y, int z, int id) {
-		world.setBlock(x, y, z, id);
+		world.setBlockType(new TilePos(x, y, z), Blocks.getBlock(id));
 	}
 
 	@Override
-	public boolean place(World world, Random random, int x, int y, int z) {
+	public boolean place(World world, Random random, TilePosc tilePos) {
+		int x = tilePos.x();
+		int y = tilePos.y();
+		int z = tilePos.z();
 		this.wallBlockA = ModBlocks.BRICK_MUD_BAKED.id();
 		this.wallBlockB = Blocks.MUD_BAKED.id();
 		this.floorBlock = Blocks.COBBLE_STONE_MOSSY.id();
 		this.slabBlock = ModBlocks.SLAB_BRICK_MUD_BAKED.id();
 
-		Block<?> block = world.getBlock(x,y-1,z);
+		Block<?> block = world.getBlockType(new TilePos(x,y-1,z));
 		if (block==null || !block.hasTag(BlockTags.IS_WATER)) {
 			//CHEST LOOT
 			this.chestLoot = new WeightedRandomBag();
@@ -264,26 +268,26 @@ public class WorldFeatureMaze extends WorldFeature {
 		switch (random.nextInt(5)) {
 			case 0: //SHELVES
 				if (dir!=null) {
-					Axis dax = dir.getAxis();
+					Axis dax = dir.axis();
 					int xo = dax.equals(Axis.Z) ? 1 : 0;
 					int zo = dax.equals(Axis.X) ? 1 : 0;
 					for (int i=-size;i<=size;i++) {
-						setBlock(world, blockX+dir.getOffsetX()+xo*i,blockY+1,blockZ+dir.getOffsetZ()+zo*i,this.getWallBlock(random));
+						setBlock(world, blockX+dir.offsetX()+xo*i,blockY+1,blockZ+dir.offsetZ()+zo*i,this.getWallBlock(random));
 					}
 					if (random.nextInt(3)==0) {
 						for (int i=-size;i<=size;i++) {
-							setBlock(world, blockX+dir.getOffsetX()+xo*i,blockY+3,blockZ+dir.getOffsetZ()+zo*i,this.getWallBlock(random));
+							setBlock(world, blockX+dir.offsetX()+xo*i,blockY+3,blockZ+dir.offsetZ()+zo*i,this.getWallBlock(random));
 						}
 					}
 					if (random.nextInt(3)==0) {
-						this.generateChest(world,random,blockX+dir.getOffsetX(),blockY+1,blockZ+dir.getOffsetZ(),this.getCloseDoorsAmount(doors));
+						this.generateChest(world,random,blockX+dir.offsetX(),blockY+1,blockZ+dir.offsetZ(),this.getCloseDoorsAmount(doors));
 					}
 				}
 				break;
 			case 1:
 				//SHELF
 				for (int x=-1;x<=1;x++) {
-					world.setBlockAndMetadataWithNotify(blockX+x, blockY+height-3, blockZ, this.slabBlock, 2);
+					world.setBlockTypeDataNotify(new TilePos(blockX+x, blockY+height-3, blockZ), Blocks.getBlock(this.slabBlock), 2);
 				}
 				if (random.nextInt(2)==0) {
 					this.generateChest(world, random, blockX, blockY+height-2, blockZ, this.getCloseDoorsAmount(doors));
@@ -295,7 +299,7 @@ public class WorldFeatureMaze extends WorldFeature {
 	private void generateDecor(World world, Random random, int blockX, int blockY, int blockZ, int size, int bid, int chance) {
 		for (int x = -size+1; x<=size-1; x++) {
 			for (int z = -size+1; z<=size-1; z++) {
-				if (world.canPlaceInsideBlock(blockX+x, blockY, blockZ+z) && random.nextInt(chance)==0) {
+				if (world.canPlaceInsideBlock(new TilePos(blockX+x, blockY, blockZ+z)) && random.nextInt(chance)==0) {
 					setBlock(world, blockX+x, blockY, blockZ+z, bid);
 				}
 			}
@@ -325,8 +329,8 @@ public class WorldFeatureMaze extends WorldFeature {
 
 	private HashMap<Direction,Boolean> getDoors(World world, int blockX, int blockY, int blockZ, int size) {
 		HashMap<Direction,Boolean> out = new HashMap<>();
-		for (Direction dir : Direction.horizontalDirections) {
-			int bid = world.getBlockId(blockX+dir.getOffsetX()*size,blockY+1,blockZ+dir.getOffsetZ()*size);
+		for (Direction dir : Direction.horizontal) {
+			int bid = world.getBlockType(new TilePos(blockX+dir.offsetX()*size,blockY+1,blockZ+dir.offsetZ()*size)).id();
 			out.put(dir,!(bid==this.wallBlockA || bid==this.wallBlockB));
 		}
 		return out;
@@ -362,18 +366,18 @@ public class WorldFeatureMaze extends WorldFeature {
 		if (bid==0 && random.nextInt(2)==0) {
 			bid = ModBlocks.BLOCK_BONE.id();
 		}
-		setBlock(world, blockX+dir.getOffsetX()*size, blockY, blockZ+dir.getOffsetZ()*size, bid);
-		setBlock(world, blockX+dir.getOffsetX()*size, blockY+1, blockZ+dir.getOffsetZ()*size, bid);
+		setBlock(world, blockX+dir.offsetX()*size, blockY, blockZ+dir.offsetZ()*size, bid);
+		setBlock(world, blockX+dir.offsetX()*size, blockY+1, blockZ+dir.offsetZ()*size, bid);
 	}
 
 	//CHESTS
 
 	private void generateChest(World world, Random random, int blockX, int blockY, int blockZ, int tier) {
 		setBlock(world, blockX, blockY, blockZ, Blocks.CHEST_PLANKS_OAK.id());
-		BlockLogicChest.setDefaultDirection(world, blockX, blockY, blockZ);
-		TileEntityChest tileentitychest = (TileEntityChest)world.getTileEntity(blockX, blockY, blockZ);
+		BlockLogicChest.setDefaultDirection(world, new TilePos(blockX, blockY, blockZ));
+		TileEntityChest tileentitychest = (TileEntityChest)world.getTileEntity(new TilePos(blockX, blockY, blockZ));
 		if (tileentitychest==null) {
-			world.setTileEntity(blockX,blockY,blockZ,new TileEntityChest());
+			world.setTileEntity(new TilePos(blockX, blockY, blockZ), new TileEntityChest());
 		}
 
 		int amount = 12+tier*4;

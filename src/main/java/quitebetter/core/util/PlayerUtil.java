@@ -4,17 +4,16 @@ import net.minecraft.client.entity.player.PlayerLocal;
 import net.minecraft.client.player.controller.PlayerController;
 import net.minecraft.client.player.controller.PlayerControllerMP;
 import net.minecraft.core.entity.player.Player;
+import net.minecraft.core.enums.HumanArmorShape;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
-import net.minecraft.core.net.packet.PacketContainerSetSlot;
 import net.minecraft.core.net.packet.PacketEntityFling;
 import net.minecraft.core.net.packet.PacketPlayerAction;
 import net.minecraft.core.net.packet.PacketTileEntityData;
 import net.minecraft.core.player.inventory.container.ContainerInventory;
 import net.minecraft.server.entity.player.PlayerServer;
 import turniplabs.halplibe.HalpLibe;
-import turniplabs.halplibe.helper.EnvironmentHelper;
 import static quitebetter.core.ModCore.LOGGER;
 
 public class PlayerUtil {
@@ -37,7 +36,7 @@ public class PlayerUtil {
 	}
 
 	public static ItemStack getQuiver(Player player) {
-		ItemStack quiverSlot = player.inventory.armorItemInSlot(2);
+		ItemStack quiverSlot = player.inventory.armorItemInSlot(HumanArmorShape.CHEST);
 		if (quiverSlot != null && quiverSlot.itemID == Items.ARMOR_QUIVER_GOLD.id && quiverSlot.getMetadata() < quiverSlot.getMaxDamage()) {
 			return quiverSlot;
 		} else if (quiverSlot != null && quiverSlot.itemID == Items.ARMOR_QUIVER.id && quiverSlot.getMetadata() < quiverSlot.getMaxDamage()) {
@@ -77,7 +76,7 @@ public class PlayerUtil {
 		ContainerInventory inv = player.inventory;
 		for(int i = 0; i < inv.mainInventory.length; ++i) {
 			ItemStack slot = player.inventory.getItem(i);
-			if (slot!=null && slot.getItem().equals(item) && (!slot.getHasSubtypes() || slot.getMetadata() == meta)) {
+			if (slot!=null && slot.getItem().equals(item) && (!slot.getItem().getHasSubtypes() || slot.getMetadata() == meta)) {
 				return i;
 			}
 		}
@@ -87,7 +86,7 @@ public class PlayerUtil {
 	public static boolean stackToInventory(Player player, int index, ItemStack itemstack) {
 		ContainerInventory inv = player.inventory;
 		ItemStack slot = inv.getItem(index);
-		if (slot==null || (slot.itemID==itemstack.itemID && (!slot.getHasSubtypes() || slot.getMetadata() == itemstack.getMetadata()) && slot.getData() == itemstack.getData() && ( slot.isStackable() && slot.getMaxStackSize()-itemstack.stackSize-slot.stackSize>=0 )) ) {
+		if (slot==null || (slot.itemID==itemstack.itemID && (!slot.getItem().getHasSubtypes() || slot.getMetadata() == itemstack.getMetadata()) && slot.getData() == itemstack.getData() && ( slot.isStackable() && slot.getMaxStackSize()-itemstack.stackSize-slot.stackSize>=0 )) ) {
 			if (slot!=null) { itemstack.stackSize += slot.stackSize; }
 			inv.setItem(index,itemstack);
 			return true;
@@ -105,16 +104,13 @@ public class PlayerUtil {
 		return -1;
 	}
 
-	public static boolean isArmorItemThis(Player player, int slot, Item item) {
-		ItemStack stack = player.inventory.armorItemInSlot(slot);
+	public static boolean isArmorItemThis(Player player, HumanArmorShape shape, Item item) {
+		ItemStack stack = player.inventory.armorItemInSlot(shape);
 		return stack!=null && stack.getItem().equals(item);
 	}
 
 	public static void inventorySetSlot(Player player, int index, ItemStack stack) {
 		player.inventory.setItem(index, stack);
-		if (EnvironmentHelper.isServerEnvironment()) {
-			ServerUtil.sendToWorldPlayers(player.world,new PacketContainerSetSlot(0,index,stack));
-		}
 	}
 
 	public static void inventoryInfo(Player player) {

@@ -9,6 +9,7 @@ import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.DyeColor;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockLogicHazard extends BlockLogic implements IPaintable {
@@ -16,10 +17,12 @@ public class BlockLogicHazard extends BlockLogic implements IPaintable {
 		super(block, material);
 	}
 
-	public int getPlacedBlockMetadata(@Nullable Player player, ItemStack stack, World world, int x, int y, int z, Side side, double xPlaced, double yPlaced) {
+	@Override
+	public int getPlacedData(@Nullable Player player, ItemStack stack, World world, TilePosc tilePos, Side side, double xPlaced, double yPlaced) {
 		return stack.getMetadata() & 15;
 	}
 
+	@Override
 	public ItemStack[] getBreakResult(World world, EnumDropCause dropCause, int meta, TileEntity tileEntity) {
 		return new ItemStack[]{new ItemStack(this, 1, meta)};
 	}
@@ -36,17 +39,18 @@ public class BlockLogicHazard extends BlockLogic implements IPaintable {
 		return 0;
 	}
 
-	public void removeDye(World world, int x, int y, int z) {
-		world.setBlockMetadataWithNotify(x, y, z, 0);
+	public void removeDye(World world, TilePosc tilePos) {
+		world.setBlockDataNotify(tilePos, 0);
 	}
 
+	@Override
 	public String getLanguageKey(int meta) {
 		return this.block.getKey();
 	}
 
 	@Override
-	public void setColor(World world, int x, int y, int z, DyeColor color) {
-		world.setBlock(x, y, z, ModBlocks.HAZARD_PAINTED.id());
-		((BlockLogicHazardPainted)ModBlocks.HAZARD_PAINTED.getLogic()).setColor(world, x, y, z, color);
+	public void setColor(World world, TilePosc tilePos, DyeColor color) {
+		world.setBlockType(tilePos, ModBlocks.HAZARD_PAINTED);
+		((BlockLogicHazardPainted)ModBlocks.HAZARD_PAINTED.getLogic()).setColor(world, tilePos, color);
 	}
 }

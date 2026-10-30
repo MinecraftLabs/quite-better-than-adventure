@@ -6,6 +6,7 @@ import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 import net.minecraft.core.util.helper.Side;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,12 +19,13 @@ public class ItemHook extends Item {
 		super(name, namespaceId, id);
 	}
 
-	public boolean onUseItemOnBlock(ItemStack itemstack, @Nullable Player player, World world, int blockX, int blockY, int blockZ, Side side, double xPlaced, double yPlaced) {
-		Block<?> block = world.getBlock(blockX, blockY, blockZ);
+	@Override
+	public boolean onUseOnBlock(ItemStack itemstack, World world, @Nullable Player player, TilePosc blockPos, Side side, double xPlaced, double yPlaced) {
+		Block<?> block = world.getBlockType(blockPos);
 		//check if block can be climbed
-		double distance = player.distanceTo(blockX+0.5, blockY+0.5, blockZ+0.5);
+		double distance = player.distanceTo(blockPos.x()+0.5, blockPos.y()+0.5, blockPos.z()+0.5);
 		if (block != null && block.isCubeShaped() && side != Side.BOTTOM && side != Side.TOP &&
-			blockY < player.y && player.yd < 0.1
+			blockPos.y() < player.y && player.yd < 0.1
 			&& distance <= 1.8
 		) {
 			if (block.id() == 110) { //WOOL
@@ -31,7 +33,7 @@ public class ItemHook extends Item {
 				world.playSoundAtEntity((Entity)player, (Entity)player, "step.cloth", 0.1F, 2F / (itemRand.nextFloat() * 0.4F + 0.8F));
 				return true;
 			} else {
-				world.playBlockEvent(player, 2001, blockX, blockY, blockZ, world.getBlockId(blockX, blockY, blockZ));
+				world.playBlockEvent(player, blockPos, 2001, block.id());
 				player.yd = 0.5;
 				player.fallDistance = 0;
 				player.swingItem();

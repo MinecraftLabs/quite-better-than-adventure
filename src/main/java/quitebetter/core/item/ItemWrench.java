@@ -1,13 +1,10 @@
 package quitebetter.core.item;
 
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.render.RenderGlobal;
-import net.minecraft.client.render.Renderer;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.core.block.*;
 import net.minecraft.core.block.entity.TileEntityActivator;
 import net.minecraft.core.block.piston.BlockLogicPistonBase;
+import net.minecraft.core.block.piston.PistonCommon;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
@@ -16,12 +13,14 @@ import net.minecraft.core.util.helper.Axis;
 import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
-import org.apache.commons.lang3.ArrayUtils;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 import quitebetter.core.block.BlockLogicAxisAlignedPainted;
 import quitebetter.core.block.BlockLogicCorrugatedIron;
 import quitebetter.core.util.BlockUtil;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static quitebetter.core.ModCore.LOGGER;
@@ -60,25 +59,25 @@ public class ItemWrench extends Item {
 	};
 
 	static Direction rotateRotatable(Direction dir, Side side) {
-		Axis dax = dir.getAxis();
-		Axis sax = side.getAxis();
+		Axis dax = dir.axis();
+		Axis sax = side.axis();
 		if (dax!=sax && sax.equals(Axis.Y)) {
-			return YAxisDirections[ArrayUtils.indexOf(YAxisDirections, dir)+1&3];
+			return YAxisDirections[Arrays.asList(YAxisDirections).indexOf(dir)+1&3];
 		}
 		return dir;
 	}
 
 	static Direction rotateVeryRotatable(Direction dir, Side side) {
-		Axis dax = dir.getAxis();
-		Axis sax = side.getAxis();
+		Axis dax = dir.axis();
+		Axis sax = side.axis();
 		if (dax!=sax) {
 			switch (sax) {
 				case X:
-					return XAxisDirections[ArrayUtils.indexOf(XAxisDirections, dir)+1&3];
+					return XAxisDirections[Arrays.asList(XAxisDirections).indexOf(dir)+1&3];
 				case Y:
-					return YAxisDirections[ArrayUtils.indexOf(YAxisDirections, dir)+1&3];
+					return YAxisDirections[Arrays.asList(YAxisDirections).indexOf(dir)+1&3];
 				case Z:
-					return ZAxisDirections[ArrayUtils.indexOf(ZAxisDirections, dir)+1&3];
+					return ZAxisDirections[Arrays.asList(ZAxisDirections).indexOf(dir)+1&3];
 				default:
 					break;
 			}
@@ -87,7 +86,7 @@ public class ItemWrench extends Item {
 	}
 
 	static Axis rotateAxisAligned(Axis axis, Side side) {
-		Axis sax = side.getAxis();
+		Axis sax = side.axis();
 		if (axis!=sax) {
 			switch (sax) {
 				case X:
@@ -105,22 +104,22 @@ public class ItemWrench extends Item {
 
 	static int rotateStairs(int meta, Side side) {
 		BlockUtil.Stairs.StairsDirection dir = BlockUtil.Stairs.getDirection(meta);
-		Axis sax = side.getAxis();
-		Axis hdax = dir.hDir.getAxis();
+		Axis sax = side.axis();
+		Axis hdax = dir.hDir.axis();
 		BlockUtil.Stairs.StairsDirection sdir = null;
 		if (sax!=hdax) {
 			switch (sax) {
 				case X:
-					dir = XAxisStairsDirections[ArrayUtils.indexOf(XAxisStairsDirections, dir)+1&3];
+					dir = XAxisStairsDirections[Arrays.asList(XAxisStairsDirections).indexOf(dir)+1&3];
 					break;
 				case Y:
 					dir = new BlockUtil.Stairs.StairsDirection(
-						YAxisDirections[ArrayUtils.indexOf(YAxisDirections, dir.hDir)+1&3],
+						YAxisDirections[Arrays.asList(YAxisDirections).indexOf(dir.hDir)+1&3],
 						dir.vDir
 					);
 					break;
 				case Z:
-					dir = ZAxisStairsDirections[ArrayUtils.indexOf(ZAxisStairsDirections, dir)+1&3];
+					dir = ZAxisStairsDirections[Arrays.asList(ZAxisStairsDirections).indexOf(dir)+1&3];
 					break;
 				default:
 					break;
@@ -134,23 +133,23 @@ public class ItemWrench extends Item {
 		super(name, namespaceId, id);
 	}
 
-	public boolean rotateBlock(World world, int x, int y, int z, Side side) {
+	public boolean rotateBlock(World world, TilePosc tilePos, Side side) {
 		boolean success = false;
 
-		Block<?> block = world.getBlock(x, y, z);
+		Block<?> block = world.getBlockType(tilePos);
 		if (block != null) {
 			BlockLogic logic = block.getLogic();
-			int meta = world.getBlockMetadata(x,y,z);
+			int meta = world.getBlockData(tilePos);
 
 			if (logic instanceof BlockLogicRotatable) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					BlockLogicRotatable.setDirection(meta,
 						rotateRotatable(BlockLogicRotatable.getDirectionFromMeta(meta), side)
 					)
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicAxisAlignedPainted) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					((BlockLogicAxisAlignedPainted) logic).stripAxisFromMetadata(meta) |
 						BlockLogicAxisAligned.axisToMeta(
 							rotateAxisAligned(BlockLogicAxisAlignedPainted.metaToAxis(meta), side)
@@ -158,51 +157,51 @@ public class ItemWrench extends Item {
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicVeryRotatable) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					BlockLogicVeryRotatable.setDirection(meta,
 						rotateVeryRotatable(BlockLogicVeryRotatable.metaToDirection(meta), side)
 					)
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicAxisAligned) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					BlockLogicAxisAligned.axisToMeta(
 						rotateAxisAligned(BlockLogicAxisAligned.metaToAxis(meta), side)
 					)
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicStairsPainted) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					(meta & 240) | rotateStairs(meta & 15, side)
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicStairs) {
-				world.setBlockMetadataWithNotify(x, y, z,
+				world.setBlockDataNotify(tilePos,
 					rotateStairs(meta,side)
 				);
 				success = true;
 			} else if (logic instanceof BlockLogicPistonBase) {
-				if (!BlockLogicPistonBase.isPowered(meta)) {
-					world.setBlockMetadataWithNotify(x, y, z,BlockLogicVeryRotatable.setDirection(meta,
-							rotateVeryRotatable(BlockLogicPistonBase.getDirection(meta), side)
-						)
-					);
+				int data = PistonCommon.fixLegacyBaseData(world, tilePos);
+				if (!PistonCommon.IS_EXTENDED.bool(data)) {
+					world.setBlockDataNotify(tilePos, PistonCommon.DIRECTION.set(data, rotateVeryRotatable(Direction.fromId(PistonCommon.DIRECTION.get(data)), side).id));
 				}
 				success = true;
 			}
 		}
 		if (success) {
 			Random random = new Random();
-			world.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, x, y, z, "random.door_open", 0.25F, 3F + (random.nextFloat() - random.nextFloat()) * 0.4F);
+			world.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x(), tilePos.y(), tilePos.z(), "random.door_open", 0.25F, 3F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 		}
 		return success;
 	}
 
-	public boolean onUseItemOnBlock(ItemStack itemstack, @Nullable Player player, World world, int x, int y, int z, Side side, double xPlaced, double yPlaced) {
-		return rotateBlock(world, x, y, z, side);
+	@Override
+	public boolean onUseOnBlock(ItemStack itemstack, World world, @Nullable Player player, TilePosc blockPos, Side side, double xPlaced, double yPlaced) {
+		return rotateBlock(world, blockPos, side);
 	}
 
-	public void onUseByActivator(ItemStack itemStack, TileEntityActivator activatorBlock, World world, Random random, int x, int y, int z, double offX, double offY, double offZ, Direction direction) {
-		rotateBlock(world, x+direction.getOffsetX(), y+direction.getOffsetY(), z+direction.getOffsetZ(), direction.getSide().getOpposite());
+	@Override
+	public void onUseByActivator(ItemStack itemStack, World world, TileEntityActivator activator, Random random, TilePosc blockPos, Direction direction, double offX, double offY, double offZ) {
+		rotateBlock(world, blockPos.add(direction, new TilePos()), direction.side().opposite());
 	}
 }

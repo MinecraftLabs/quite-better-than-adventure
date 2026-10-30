@@ -44,6 +44,7 @@ public class BlockLogicGeode extends BlockLogic {
 		super(block, material);
 	}
 
+	@Override
 	public ItemStack @Nullable [] getBreakResult(World world, EnumDropCause dropCause, int meta, TileEntity tileEntity) {
 		if (dropCause==EnumDropCause.PISTON_CRUSH) {
 			Random rand = new Random();

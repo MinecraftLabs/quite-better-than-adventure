@@ -1,11 +1,13 @@
 package quitebetter.core.item.glove;
 
+import net.minecraft.core.enums.HumanArmorShape;
 import net.minecraft.core.item.IArmorItem;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.material.ArmorMaterial;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemGloveLeather extends Item implements IArmorItem {
+public class ItemGloveLeather extends Item implements IArmorItem<HumanArmorShape> {
 	public ItemGloveLeather(String name, String namespaceId, int id) {
 		super(name, namespaceId, id);
 	}
@@ -15,7 +17,9 @@ public class ItemGloveLeather extends Item implements IArmorItem {
 		return null;
 	}
 
-	public int getArmorPiece() {
-		return 2;
+	@NotNull
+	@Override
+	public HumanArmorShape getArmorShape() {
+		return HumanArmorShape.CHEST;
 	}
 }
