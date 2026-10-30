@@ -6,6 +6,8 @@ import net.minecraft.core.item.ItemFlag;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,33 +19,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 )
 public class ItemFlagMixin {
 	@Inject(
-		method = {"onUseItemOnBlock"},
+		method = {"onUseOnBlock"},
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/core/world/World;playBlockSoundEffect(Lnet/minecraft/core/entity/Entity;DDDLnet/minecraft/core/block/Block;Lnet/minecraft/core/enums/EnumBlockSoundEffectType;)V",
-			shift = At.Shift.BEFORE
-		),
-		cancellable = true
-	)
-	private void onUseItemOnBlock(ItemStack stack, Player entityplayer, World world, int x, int y, int z, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
-//		Block<?> block = world.getBlock(x-side.getOffsetX(),y-side.getOffsetY(),z-side.getOffsetZ());
-//		if (block==null || side.isHorizontal() && !block.isCubeShaped()) {
-//			cir.cancel();
-//		}
-	}
-
-	@Inject(
-		method = {"onUseItemOnBlock"},
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/core/world/World;setBlockAndMetadataWithNotify(IIIII)Z",
+			target = "Lnet/minecraft/core/world/World;setBlockType(Lnet/minecraft/core/world/pos/TilePosc;Lnet/minecraft/core/block/Block;)Z",
 			shift = At.Shift.AFTER
 		)
 	)
-	private void onUseItemOnBlockDirection(ItemStack stack, Player entityplayer, World world, int x, int y, int z, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
-		if (world.getBlock(x, y, z)!=null && world.getBlock(x, y, z).equals(Blocks.FLAG)) {
+	private void onUseOnBlockDirection(ItemStack stack, World world, @Nullable Player entityplayer, TilePosc blockPos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
+		if (world.getBlockType(blockPos)!=null && world.getBlockType(blockPos).equals(Blocks.FLAG)) {
 			if ( side.isHorizontal()) {
-				world.setBlockMetadata(x,y,z,side.getDirection().getId());
+				world.setBlockData(blockPos, side.direction().id);
 			}
 		}
 	}

@@ -7,17 +7,14 @@
   },
   "plugin": "quitebetter.mixin.MixinConfig",
   "mixins": [
-    "core.BlockLogicFenceMixin",
     "core.BlockLogicMixin",
     "core.BlockLogicMushroomMixin",
     "core.ChunkDecoratorOverworldMixin",
-    "core.CreativeItemsMixin",
     "core.EntityFallingBlockMixin",
     "core.EntityMinecartMixin",
     "core.FishingBobberMixin",
     "core.PlayerMixin",
     "core.TileEntityBasketMixin",
-    "core.TileEntityDispatcherMixin",
     "core.feature.CherryTreeFancyMixin",
     "core.feature.TreeCaatingaMixin",
     "core.feature.TreeEucalyptusMixin",
@@ -36,21 +33,19 @@
     "core.item.ItemBowMixin",
     "core.item.ItemFishingRodMixin",
     "core.item.ItemFlagMixin",
-    "core.item.ItemMixin",
-    "core.packet.PacketAddParticleMixin"
+    "core.item.ItemSlimeballMixin"
   ],
   "client": [
     "client.BlockModelRopeMixin",
-    "client.EntityRenderDispatcherMixin",
     "client.MinecraftMixin",
-    "client.PacketHandlerClientMixin",
     "client.PlayerControllerMixin",
     "client.PlayerControllerSPMixin",
     "client.TextureMagangerMixin",
-    "client.TileEntityRenderDispatcherMixin",
-    "client.TileEntityRendererFlagMixin"
+    "client.TileEntityRendererFlagMixin",
+    "client.WorldRendererMixin"
   ],
   "server": [
+    "server.MinecraftServerMixin",
     "server.PacketHandlerServerMixin"
   ]
 }

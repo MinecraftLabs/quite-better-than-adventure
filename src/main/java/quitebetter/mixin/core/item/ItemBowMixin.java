@@ -5,6 +5,7 @@ import quitebetter.core.projectile.ProjectileArrowTorch;
 import quitebetter.core.util.PlayerUtil;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.entity.projectile.ProjectileArrow;
+import net.minecraft.core.entity.projectile.ProjectileArrowFlaming;
 import net.minecraft.core.entity.projectile.ProjectileArrowGolden;
 import net.minecraft.core.entity.projectile.ProjectileArrowPurple;
 import net.minecraft.core.item.Item;
@@ -25,11 +26,11 @@ import java.util.Random;
 )
 public class ItemBowMixin {
 	@Inject(
-		method = {"onUseItem"},
+		method = {"onUse"},
 		at = @At("HEAD"),
 		cancellable = true
 	)
-	public void onUseItem(ItemStack itemstack, World world, Player entityplayer, CallbackInfoReturnable<ItemStack> cir) {
+	public void onUse(ItemStack itemstack, World world, Player entityplayer, CallbackInfoReturnable<ItemStack> cir) {
 		Random rand = new Random();
 		Item item = entityplayer.getNextArrow();
 		if (item!=null) {
@@ -40,6 +41,8 @@ public class ItemBowMixin {
 			if (!world.isClientSide) {
 				if (item.equals(Items.AMMO_ARROW)) {
 					world.entityJoinedWorld(new ProjectileArrow(world, entityplayer, true, 0));
+				} else if (item.equals(Items.AMMO_ARROW_FLAMING)) {
+					world.entityJoinedWorld(new ProjectileArrowFlaming(world, entityplayer, true));
 				} else if (item.equals(Items.AMMO_ARROW_GOLD)) {
 					world.entityJoinedWorld(new ProjectileArrowGolden(world, entityplayer, true));
 				} else if (item.equals(Items.AMMO_ARROW_PURPLE)) {

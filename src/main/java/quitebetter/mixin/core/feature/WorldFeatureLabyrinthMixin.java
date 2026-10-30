@@ -2,19 +2,18 @@ package quitebetter.mixin.core.feature;
 
 import net.minecraft.core.WeightedRandomBag;
 import net.minecraft.core.WeightedRandomLootObject;
-import net.minecraft.core.block.BlockLogicChest;
-import net.minecraft.core.block.BlockLogicRotatable;
-import net.minecraft.core.block.BlockLogicVeryRotatable;
 import net.minecraft.core.block.Blocks;
 import net.minecraft.core.block.entity.TileEntityChest;
-import net.minecraft.core.block.entity.TileEntityMobSpawner;
 import net.minecraft.core.block.material.Material;
+import net.minecraft.core.block.material.Materials;
 import net.minecraft.core.block.tag.BlockTags;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.Axis;
 import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.generate.feature.WorldFeatureLabyrinth;
+import net.minecraft.core.world.pos.TilePos;
+import net.minecraft.core.world.pos.TilePosc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import quitebetter.core.block.ModBlocks;
 
 import java.util.Random;
-import java.util.logging.Logger;
 
 @Mixin(
 	value = {WorldFeatureLabyrinth.class},
@@ -55,6 +53,8 @@ public class WorldFeatureLabyrinthMixin {
 	@Shadow
 	int slabBlock;
 	@Shadow
+	int pressurePlateBlock;
+	@Shadow
 	public ItemStack treasureItem;
 	@Shadow
 	public WeightedRandomBag<WeightedRandomLootObject> chestLoot;
@@ -64,19 +64,38 @@ public class WorldFeatureLabyrinthMixin {
 	public WeightedRandomBag<String> spawnerMonsters;
 	//METHOD COPIES
 	@Unique
-	private boolean canReplace(World world, int x, int y, int z) {
+	private boolean canReplace(World world, TilePosc tilePos) {
+		int y = tilePos.y();
 		if (y <= 11) {
 			return false;
-		} else if (world.getBlockId(x, y, z) != brickBlockA && world.getBlockId(x, y, z) != Blocks.PLANKS_OAK.id() && world.getBlockId(x, y, z) != Blocks.COBWEB.id() && world.getBlockId(x, y, z) != Blocks.BOOKSHELF_PLANKS_OAK.id() && world.getBlockId(x, y, z) != Blocks.MOBSPAWNER.id() && world.getBlockId(x, y, z) != this.brickBlockB) {
-			if (world.getBlockId(x, y, z) != Blocks.MOTION_SENSOR_IDLE.id() && world.getBlockId(x, y, z) != Blocks.DISPENSER_COBBLE_STONE.id() && world.getBlockId(x, y, z) != Blocks.MOTION_SENSOR_ACTIVE.id()) {
-				return BlockTags.CAVES_CUT_THROUGH.appliesTo(world.getBlock(x, y, z)) || world.getBlockMaterial(x, y, z) == Material.grass || world.getBlockMaterial(x, y, z) == Material.dirt || world.getBlockMaterial(x, y, z).isStone() || world.getBlockMaterial(x, y, z) == Material.sand || world.getBlockMaterial(x, y, z) == Material.moss;
+		} else {
+			int block = world.getBlockType(tilePos).id();
+			if (block == this.brickBlockA
+				|| block == Blocks.PLANKS_OAK.id()
+				|| block == Blocks.COBWEB.id()
+				|| block == Blocks.BOOKSHELF_PLANKS_OAK.id()
+				|| block == Blocks.MOBSPAWNER.id()
+				|| block == this.brickBlockB) {
+				return false;
+			} else if (block != Blocks.MOTION_SENSOR_IDLE.id() && block != Blocks.MOTION_SENSOR_ACTIVE.id() && block != Blocks.DISPENSER_COBBLE_STONE.id()) {
+				Material material = world.getBlockMaterial(tilePos);
+				return BlockTags.CAVES_CUT_THROUGH.appliesTo(Blocks.getBlock(block))
+					|| material == Materials.GRASS
+					|| material == Materials.DIRT
+					|| material.isStone()
+					|| material == Materials.SAND
+					|| material == Materials.MOSS;
 			} else {
-				world.removeBlockTileEntity(x, y, z);
-				world.setBlockWithNotify(x, y, z, 0);
+				world.removeTileEntity(tilePos);
+				if (block == Blocks.DISPENSER_COBBLE_STONE.id()
+					&& (world.getBlockData(tilePos) & 7) == Direction.UP.id
+					&& world.getBlockType(tilePos.up(new TilePos())).id() == this.pressurePlateBlock) {
+					world.setBlockTypeNotify(tilePos.up(new TilePos()), Blocks.AIR);
+				}
+
+				world.setBlockTypeNotify(tilePos, Blocks.AIR);
 				return true;
 			}
-		} else {
-			return false;
 		}
 	}
 	@Unique
@@ -94,8 +113,8 @@ public class WorldFeatureLabyrinthMixin {
 	}
 	//UNIQUE
 	@Unique
-	private boolean isRoomDirectionEmpty(World world, int x, int y, int z, int roomsize, Direction dir) {
-		return world.canPlaceInsideBlock(x+dir.getOffsetX()*roomsize,y+dir.getOffsetY()*roomsize,z+dir.getOffsetZ()*roomsize);
+	private boolean isRoomDirectionEmpty(World world, TilePosc tilePos, int roomsize, Direction dir) {
+		return world.canPlaceInsideBlock(tilePos.add(dir.offsetX()*roomsize, dir.offsetY()*roomsize, dir.offsetZ()*roomsize, new TilePos()));
 	}
 	//INJECTIONS
 	@Inject(
@@ -132,8 +151,8 @@ public class WorldFeatureLabyrinthMixin {
 
 				for (int z = blockZ - length; z <= blockZ + length; ++z) {
 					boolean zWallCheck = z == blockZ - length || z == blockZ + length;
-					if (y>blockY-height && !world.canPlaceInsideBlock(x, y-1, z) && !zWallCheck && !xWallCheck && random.nextInt(7) == 0) {
-						world.setBlockWithNotify(x, y, z, ModBlocks.BLOCK_BONE.id());
+					if (y>blockY-height && !world.canPlaceInsideBlock(new TilePos(x, y-1, z)) && !zWallCheck && !xWallCheck && random.nextInt(7) == 0) {
+						world.setBlockTypeNotify(new TilePos(x, y, z), ModBlocks.BLOCK_BONE);
 					}
 				}
 			}
@@ -158,14 +177,15 @@ public class WorldFeatureLabyrinthMixin {
 	private void generateCrypt(World world, Random random, int blockX, int blockY, int blockZ) {
 		int size = 4;
 		Axis roomAxis = null;
+		TilePos centerPos = new TilePos(blockX, blockY, blockZ);
 		if (
-			!isRoomDirectionEmpty(world,blockX,blockY,blockZ,size,Direction.EAST) &&
-				!isRoomDirectionEmpty(world,blockX,blockY,blockZ,size,Direction.WEST)
+			!isRoomDirectionEmpty(world,centerPos,size,Direction.EAST) &&
+				!isRoomDirectionEmpty(world,centerPos,size,Direction.WEST)
 		) {
 			roomAxis = Axis.Z;
 		} else if (
-			!isRoomDirectionEmpty(world,blockX,blockY,blockZ,size,Direction.NORTH) &&
-				!isRoomDirectionEmpty(world,blockX,blockY,blockZ,size,Direction.SOUTH)
+			!isRoomDirectionEmpty(world,centerPos,size,Direction.NORTH) &&
+				!isRoomDirectionEmpty(world,centerPos,size,Direction.SOUTH)
 		) {
 			roomAxis = Axis.X;
 		}
@@ -179,19 +199,19 @@ public class WorldFeatureLabyrinthMixin {
 						boolean xWallCheck = x == blockX - size || x == blockX + size;
 						boolean zWallCheck = z == blockZ - size || z == blockZ + size;
 						boolean yWallCheck = y == blockY - 2;
-						if (this.canReplace(world, x, y, z)) {
+						if (this.canReplace(world, new TilePos(x, y, z))) {
 							if (!xWallCheck && !zWallCheck) {
 								if (yWallCheck) {
 									if (random.nextInt(5) == 0) {
-										world.setBlockWithNotify(x, y, z, this.wallBlockA);
+										world.setBlockTypeNotify(new TilePos(x, y, z), Blocks.getBlock(this.wallBlockA));
 									} else {
-										world.setBlockWithNotify(x, y, z, this.wallBlockB);
+										world.setBlockTypeNotify(new TilePos(x, y, z), Blocks.getBlock(this.wallBlockB));
 									}
 								} else {
-									world.setBlockWithNotify(x, y, z, 0);
+									world.setBlockTypeNotify(new TilePos(x, y, z), Blocks.AIR);
 								}
 							} else {
-								world.setBlockWithNotify(x, y, z, this.wallBlockB);
+								world.setBlockTypeNotify(new TilePos(x, y, z), Blocks.getBlock(this.wallBlockB));
 							}
 						}
 					}
@@ -224,10 +244,10 @@ public class WorldFeatureLabyrinthMixin {
 		//LOWER LAYER
 		for (int i=0;i<size*2-1;i++) {
 			if (i % 2 == 0) {
-				world.setBlockWithNotify(cx+xo*i,cy,cz+zo*i,this.slabBlock);
+				world.setBlockTypeNotify(new TilePos(cx+xo*i,cy,cz+zo*i), Blocks.getBlock(this.slabBlock));
 			} else {
 				bid = random.nextInt(5)==0?this.wallBlockA:this.wallBlockB;
-				world.setBlockWithNotify(cx+xo*i,cy,cz+zo*i,bid);
+				world.setBlockTypeNotify(new TilePos(cx+xo*i,cy,cz+zo*i), Blocks.getBlock(bid));
 			}
 		}
 		cy+=1;
@@ -242,19 +262,19 @@ public class WorldFeatureLabyrinthMixin {
 					case 0:
 					case 1:
 					case 2:
-						world.setBlockWithNotify(x,cy, z,ModBlocks.BLOCK_BONE.id());
+						world.setBlockTypeNotify(new TilePos(x,cy, z),ModBlocks.BLOCK_BONE);
 						break;
 					case 3:
-						world.setBlockWithNotify(x,cy, z,Blocks.BLOCK_LAPIS.id());
+						world.setBlockTypeNotify(new TilePos(x,cy, z),Blocks.BLOCK_LAPIS);
 						break;
 					case 4:
-						world.setBlockAndMetadataWithNotify(x,cy, z,
-							Blocks.CHEST_PLANKS_OAK.id(), roomAxis.equals(Axis.Z) ? (
+						world.setBlockTypeDataNotify(new TilePos(x,cy, z),
+							Blocks.CHEST_PLANKS_OAK, roomAxis.equals(Axis.Z) ? (
 								!flip ? 5 : 4
 							) : (
 								!flip ? 2 : 0
 							));
-						TileEntityChest tileentitychest = (TileEntityChest)world.getTileEntity(x,cy, z);
+						TileEntityChest tileentitychest = (TileEntityChest)world.getTileEntity(new TilePos(x,cy, z));
 						for(int k4 = 0; k4 < 10; ++k4) {
 							ItemStack itemstack = this.pickCheckLootItem(random);
 							if (itemstack != null) {
@@ -263,8 +283,8 @@ public class WorldFeatureLabyrinthMixin {
 						}
 						break;
 					case 5:
-						world.setBlockAndMetadataWithNotify(x,cy, z,
-							Blocks.MOTION_SENSOR_IDLE.id(), roomAxis.equals(Axis.Z) ? (
+						world.setBlockTypeDataNotify(new TilePos(x,cy, z),
+							Blocks.MOTION_SENSOR_IDLE, roomAxis.equals(Axis.Z) ? (
 								!flip ? 5 : 4
 							) : (
 								!flip ? 3 : 2
@@ -273,23 +293,23 @@ public class WorldFeatureLabyrinthMixin {
 				}
 
 				bid = random.nextInt(3)==0?Blocks.GRAVEL.id():ModBlocks.BLOCK_BONE.id();
-				world.setBlockWithNotify(
-					cx+xo*i-(flip?-zo:zo),
+				world.setBlockTypeNotify(
+					new TilePos(cx+xo*i-(flip?-zo:zo),
 					cy,
-					cz+zo*i-(flip?-xo:xo),
-					bid);
+					cz+zo*i-(flip?-xo:xo)),
+					Blocks.getBlock(bid));
 
 				bid = this.slabBlock;
 			} else {
 				bid = random.nextInt(5)==0?this.wallBlockA:this.wallBlockB;
 			}
-			world.setBlockWithNotify(cx+xo*i,cy,cz+zo*i,bid);
+			world.setBlockTypeNotify(new TilePos(cx+xo*i,cy,cz+zo*i), Blocks.getBlock(bid));
 		}
 		cy+=1;
 		//SHELF
 		for (int i=0;i<size*2-1;i++) {
 			bid = random.nextInt(5)==0?this.wallBlockA:this.wallBlockB;
-			world.setBlockWithNotify(cx+xo*i,cy,cz+zo*i,bid);
+			world.setBlockTypeNotify(new TilePos(cx+xo*i,cy,cz+zo*i), Blocks.getBlock(bid));
 		}
 
 		cy+=1;
@@ -306,7 +326,7 @@ public class WorldFeatureLabyrinthMixin {
 					bid = ModBlocks.BLOCK_BONE.id();
 					break;
 			}
-			world.setBlockWithNotify(cx+xo*i,cy,cz+zo*i,bid);
+			world.setBlockTypeNotify(new TilePos(cx+xo*i,cy,cz+zo*i), Blocks.getBlock(bid));
 		}
 	}
 }

@@ -3,6 +3,7 @@ package quitebetter.mixin.core;
 import quitebetter.core.item.ModItems;
 import quitebetter.core.util.PlayerUtil;
 import net.minecraft.core.entity.player.Player;
+import net.minecraft.core.enums.HumanArmorShape;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
@@ -24,10 +25,12 @@ public class PlayerMixin {
 	public void getNextArrow(CallbackInfoReturnable<Item> cir) {
 		Player player = (Player)(Object)this;
 		Item nextArrow = null;
-		ItemStack quiverSlot = player.inventory.armorItemInSlot(2);
+		ItemStack quiverSlot = player.inventory.armorItemInSlot(HumanArmorShape.CHEST);
 		/// PRIORITY: HOTBAR > QUIVER > OUT OF HOTBAR
 		//HOTBAR
-		if (PlayerUtil.hasItemInHotbar(player,Items.AMMO_ARROW_GOLD)) {
+		if (PlayerUtil.hasItemInHotbar(player,Items.AMMO_ARROW_FLAMING)) {
+			nextArrow = Items.AMMO_ARROW_FLAMING;
+		} else if (PlayerUtil.hasItemInHotbar(player,Items.AMMO_ARROW_GOLD)) {
 			nextArrow = Items.AMMO_ARROW_GOLD;
 		} else if (PlayerUtil.hasItemInHotbar(player,Items.AMMO_ARROW)) {
 			nextArrow = Items.AMMO_ARROW;
@@ -41,7 +44,9 @@ public class PlayerMixin {
 				nextArrow = Items.AMMO_ARROW;
 			} else {
 				//OUT OF HOTBAR
-				if (PlayerUtil.hasItemOutOfHotbar(player,Items.AMMO_ARROW_GOLD)) {
+				if (PlayerUtil.hasItemOutOfHotbar(player,Items.AMMO_ARROW_FLAMING)) {
+					nextArrow = Items.AMMO_ARROW_FLAMING;
+				} else if (PlayerUtil.hasItemOutOfHotbar(player,Items.AMMO_ARROW_GOLD)) {
 					nextArrow = Items.AMMO_ARROW_GOLD;
 				} else if (PlayerUtil.hasItemOutOfHotbar(player, Items.AMMO_ARROW)) {
 					nextArrow = Items.AMMO_ARROW;

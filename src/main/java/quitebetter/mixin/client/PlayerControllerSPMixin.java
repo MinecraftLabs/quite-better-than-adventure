@@ -7,13 +7,12 @@ import net.minecraft.core.block.Block;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
+import net.minecraft.core.world.pos.TilePosc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import quitebetter.core.util.ILeftClickable;
-
-import static quitebetter.core.ModCore.LOGGER;
 
 @Mixin(
 	value = {PlayerControllerSP.class},
@@ -27,13 +26,14 @@ public class PlayerControllerSPMixin {
 		cancellable = true
 	)
 	//NON-CREATIVE CASE
-	public void startDestroyBlock(int x, int y, int z, Side side, Player player, CallbackInfoReturnable<Boolean> cir) {
+	public void startDestroyBlock(TilePosc tilePos, Side side, CallbackInfoReturnable<Boolean> cir) {
 		PlayerController controller = (PlayerController)(Object)this;
 		World world = controller.mc.currentWorld;
-		Block block = world.getBlock(x,y,z);
+		Player player = controller.mc.thePlayer;
+		Block<?> block = world.getBlockType(tilePos);
 		if (block!=null && (block.getLogic() instanceof ILeftClickable)) {
 			ILeftClickable logic = (ILeftClickable) block.getLogic();
-			if (logic.preventsBreaking(world,x,y,z,player,side)) {
+			if (logic.preventsBreaking(world,tilePos,player,side)) {
 				cir.cancel();
 			}
 		}
