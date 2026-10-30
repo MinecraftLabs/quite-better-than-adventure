@@ -1,22 +1,15 @@
 package quitebetter.mixin.client;
 
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.render.FlagRenderer;
-import net.minecraft.client.render.renderer.BlendFactor;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.render.renderer.GLRenderer;
-import net.minecraft.client.render.renderer.State;
 import net.minecraft.client.render.tessellator.TessellatorGeneral;
-import net.minecraft.client.render.tileentity.TileEntityRenderer;
 import net.minecraft.client.render.tileentity.TileEntityRendererFlag;
 import net.minecraft.core.block.entity.TileEntityFlag;
 import net.minecraft.core.util.helper.Direction;
 import net.minecraft.core.util.helper.MathHelper;
-import net.minecraft.core.world.World;
 import net.minecraft.core.world.pos.TilePos;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,20 +21,20 @@ import org.useless.dragonfly.models.entity.StaticEntityModel;
 	value = {TileEntityRendererFlag.class},
 	remap = false
 )
-public abstract class TileEntityRendererFlagMixin extends TileEntityRenderer<TileEntityFlag> {
-	@Shadow
-	@Final
-	private FlagRenderer flagRenderer;
-	@Shadow
-	@Final
-	public Minecraft mc;
-	@Shadow
-	private long lastTick;
-
+public class TileEntityRendererFlagMixin {
 	@Unique
 	private static final float rotationValue = 15F;
 	@Unique
 	private static final float pushValue = 0.4F;
+
+	@Unique
+	private static Direction wallDirection(TileEntityFlag flag) {
+		if (flag.worldObj == null) {
+			return null;
+		}
+		Direction dir = Direction.fromId(flag.worldObj.getBlockData(flag.tilePos));
+		return dir.isHorizontal() ? dir : null;
+	}
 
 	@ModifyVariable(
 		method = "doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V",
@@ -49,38 +42,26 @@ public abstract class TileEntityRendererFlagMixin extends TileEntityRenderer<Til
 		argsOnly = true
 	)
 	private boolean modifyShortPole(boolean shortPole, TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPoleArg, float windDirection, float windIntensity) {
-		World theWorld = this.mc.currentWorld;
-		return shortPole && theWorld.getBlockData(tileEntityFlag.tilePos.down(new TilePos())) == 0;
+		if (wallDirection(tileEntityFlag) != null) {
+			return false;
+		}
+		if (tileEntityFlag.worldObj == null) {
+			return shortPole;
+		}
+		return shortPole && tileEntityFlag.worldObj.getBlockData(tileEntityFlag.tilePos.down(new TilePos())) == 0;
 	}
 
-	@Inject(
-		method = {"doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V"},
+	@ModifyVariable(
+		method = "doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V",
 		at = @At("HEAD"),
-		cancellable = true
+		argsOnly = true,
+		ordinal = 1
 	)
-	private void doRender(TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirection, float windIntensity, CallbackInfo ci) {
-		World theWorld = this.mc.currentWorld;
-		int meta = theWorld.getBlockData(tileEntityFlag.tilePos);
-		Direction dir = Direction.fromId(meta);
-		if (!dir.isHorizontal()) {
-			return;
+	private float modifyWindDirection(float windDirection, TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirectionArg, float windIntensity) {
+		Direction dir = wallDirection(tileEntityFlag);
+		if (dir == null) {
+			return windDirection;
 		}
-
-		if (theWorld.getWorldTime() != lastTick) {
-			lastTick = theWorld.getWorldTime();
-			flagRenderer.tick();
-		}
-
-		float swayInterpolated = (float)tileEntityFlag.sway + partialTick;
-		float sway = (float)((double)swayInterpolated / (double)1.5F % (Math.PI * 2D));
-		sway = (float)(Math.sin((double)sway) * (double)windIntensity * (double)2.0F);
-		GLRenderer.pushFrame();
-		GLRenderer.modelM4f().translate((float)x + 0.5F - dir.offsetX()*pushValue, (float)y + 0.75F, (float)z + 0.5F - dir.offsetZ()*pushValue);
-		GLRenderer.modelM4f().rotate(rotationValue * MathHelper.DEG_TO_RAD, dir.offsetZ(), 0.0F, -dir.offsetX());
-		GLRenderer.modelM4f().translate(0.0F, -0.75F, 0.0F);
-		GLRenderer.modelM4f().scale(0.0625F, 0.0625F, -0.0625F);
-		this.bindTexture("/assets/minecraft/textures/entity/flag.png");
-		StaticEntityModel flagModel = this.getModel("pole.long");
 		int angle = 0;
 		switch (dir) {
 			case NORTH:
@@ -96,29 +77,41 @@ public abstract class TileEntityRendererFlagMixin extends TileEntityRenderer<Til
 				angle = 2;
 				break;
 		}
-		flagModel.getTransform("base").visible = false;
-		flagModel.getTransform("flag").rotY = (angle*90 + sway) * MathHelper.DEG_TO_RAD;
-		flagModel.render();
-		flagModel.getTransform("base").visible = true;
-		flagModel.translateToBone("flag");
-		this.bindTexture("/assets/minecraft/textures/entity/flag_ui.png");
-		if (tileEntityFlag.getFlipped()) {
-			this.getModel("cloth.mirror").render();
-			GLRenderer.enableState(State.BLEND);
-			GLRenderer.setBlendFunc(BlendFactor.ONE_MINUS_SRC_COLOR, BlendFactor.SRC_COLOR);
-			this.renderDispatcher.textureManager.bindTexture(flagRenderer.getTexture(tileEntityFlag));
-			this.getModel("cloth.mirror").render();
-		} else {
-			this.getModel("cloth").render();
-			GLRenderer.enableState(State.BLEND);
-			GLRenderer.setBlendFunc(BlendFactor.ONE_MINUS_SRC_COLOR, BlendFactor.SRC_COLOR);
-			this.renderDispatcher.textureManager.bindTexture(flagRenderer.getTexture(tileEntityFlag));
-			this.getModel("cloth").render();
+		return angle * 90;
+	}
+
+	@Inject(
+		method = {"doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V"},
+		at = @At(
+			value = "INVOKE",
+			target = "Lorg/joml/Matrix4f;scale(FFF)Lorg/joml/Matrix4f;",
+			shift = At.Shift.BEFORE
+		)
+	)
+	private void applyWallTransform(TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirection, float windIntensity, CallbackInfo ci) {
+		Direction dir = wallDirection(tileEntityFlag);
+		if (dir != null) {
+			GLRenderer.modelM4f().translate(-dir.offsetX()*pushValue, 0.75F, -dir.offsetZ()*pushValue);
+			GLRenderer.modelM4f().rotate(rotationValue * MathHelper.DEG_TO_RAD, dir.offsetZ(), 0, -dir.offsetX());
+			GLRenderer.modelM4f().translate(0, -0.75F, 0);
 		}
+	}
 
-		GLRenderer.disableState(State.BLEND);
-		GLRenderer.popFrame();
-
-		ci.cancel();
+	@WrapOperation(
+		method = {"doRender(Lnet/minecraft/client/render/tessellator/TessellatorGeneral;Lnet/minecraft/core/block/entity/TileEntityFlag;DDDFZFF)V"},
+		at = @At(
+			value = "INVOKE",
+			target = "Lorg/useless/dragonfly/models/entity/StaticEntityModel;render()V",
+			ordinal = 0
+		)
+	)
+	private void renderPole(StaticEntityModel model, Operation<Void> original, TessellatorGeneral tessellator, TileEntityFlag tileEntityFlag, double x, double y, double z, float partialTick, boolean shortPole, float windDirection, float windIntensity) {
+		if (wallDirection(tileEntityFlag) != null) {
+			model.getTransform("base").visible = false;
+			original.call(model);
+			model.getTransform("base").visible = true;
+		} else {
+			original.call(model);
+		}
 	}
 }

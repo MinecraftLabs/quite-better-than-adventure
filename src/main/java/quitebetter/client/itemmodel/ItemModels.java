@@ -36,7 +36,7 @@ public class ItemModels {
 		d.addDispatch(Add(ModItems.WRENCH,"wrench", ModelTypes.TOOL));
 		d.addDispatch(Add(ModItems.META_WRENCH,"meta_wrench", ModelTypes.TOOL));
 		d.addDispatch(Add(ModItems.SEASHELL,"seashell", ModelTypes.ITEM));
-		d.addDispatch(new ItemModelSteelFishingRod(ModItems.TOOL_STEEL_FISHINGROD, false)
+		d.addDispatch(new ItemModelSteelFishingRod(ModItems.TOOL_STEEL_FISHINGROD)
 			.setDisplayPos("firstperson_righthand", ItemModelDispatcher.HANDHELD_ROD_FIRST_PERSON_RIGHT_HAND)
 			.setDisplayPos("firstperson_lefthand", ItemModelDispatcher.HANDHELD_ROD_FIRST_PERSON_LEFT_HAND)
 			.setDisplayPos("thirdperson_righthand", ItemModelDispatcher.HANDHELD_ROD_THIRD_PERSON_RIGHT_HAND)

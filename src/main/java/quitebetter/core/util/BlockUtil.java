@@ -7,21 +7,7 @@ public class BlockUtil {
 		public static final int MASK_HDIRECTION = 0b00000011;
 		public static final int MASK_VDIRECTION = 0b00001000;
 
-		public static class StairsDirection {
-			public Direction hDir;
-			public Direction vDir;
-
-			@Override
-			public boolean equals(Object obj) {
-				return obj instanceof StairsDirection
-					&& ((StairsDirection) obj).hDir.equals(this.hDir)
-					&& ((StairsDirection) obj).vDir.equals(this.vDir);
-			}
-
-			public StairsDirection(Direction hDir, Direction vDir) {
-				this.hDir = hDir;
-				this.vDir = vDir;
-			}
+		public record StairsDirection(Direction hDir, Direction vDir) {
 		}
 
 		public static StairsDirection getDirection(int meta) {
@@ -31,7 +17,7 @@ public class BlockUtil {
 		public static int getMeta(StairsDirection dir) {
 			int meta = 0;
 			int hd;
-			switch (dir.hDir) {
+			switch (dir.hDir()) {
 				case NORTH: hd = 2; break;
 				case EAST: hd = 1; break;
 				case SOUTH: hd = 3; break;
@@ -39,7 +25,7 @@ public class BlockUtil {
 				default: hd = 0;
 			}
 			meta |= hd;
-			switch (dir.vDir) {
+			switch (dir.vDir()) {
 				case UP: hd = 8; break;
 				case DOWN: hd = 0; break;
 				default: hd = 0;

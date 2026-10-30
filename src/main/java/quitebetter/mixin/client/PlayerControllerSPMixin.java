@@ -1,6 +1,7 @@
 package quitebetter.mixin.client;
 
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.controller.PlayerController;
 import net.minecraft.client.player.controller.PlayerControllerSP;
 import net.minecraft.core.block.Block;
@@ -18,7 +19,10 @@ import quitebetter.core.util.ILeftClickable;
 	value = {PlayerControllerSP.class},
 	remap = false
 )
-public class PlayerControllerSPMixin {
+public abstract class PlayerControllerSPMixin extends PlayerController {
+	public PlayerControllerSPMixin(Minecraft minecraft) {
+		super(minecraft);
+	}
 
 	@Inject(
 		method = {"destroyBlock"},
@@ -27,15 +31,11 @@ public class PlayerControllerSPMixin {
 	)
 	//NON-CREATIVE CASE
 	public void startDestroyBlock(TilePosc tilePos, Side side, CallbackInfoReturnable<Boolean> cir) {
-		PlayerController controller = (PlayerController)(Object)this;
-		World world = controller.mc.currentWorld;
-		Player player = controller.mc.thePlayer;
+		World world = this.mc.currentWorld;
+		Player player = this.mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof ILeftClickable) {
-			ILeftClickable logic = (ILeftClickable) block.getLogic();
-			if (logic.preventsBreaking(world,tilePos,player,side)) {
-				cir.cancel();
-			}
+		if (block.getLogic() instanceof ILeftClickable logic && logic.preventsBreaking(world,tilePos,player,side)) {
+			cir.cancel();
 		}
 	}
 

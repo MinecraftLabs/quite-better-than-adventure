@@ -9,7 +9,6 @@ import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.enums.PlacementMode;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.Axis;
-import net.minecraft.core.util.helper.DyeColor;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.pos.TilePosc;

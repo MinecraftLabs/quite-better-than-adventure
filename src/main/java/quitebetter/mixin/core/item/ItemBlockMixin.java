@@ -43,8 +43,7 @@ public class ItemBlockMixin {
 			}
 		} else if (itemstack.getItem().equals(Blocks.TORCH_REDSTONE_ACTIVE.asItem()) && (entityplayer == null || !entityplayer.isSneaking())) {
 			if (BlockLogicFan.isFan(block)) {
-				BlockLogicFan logic = (BlockLogicFan) block.getLogic();
-				logic.toggleInverted(world, blockPos);
+				BlockLogicFan.toggleInverted(world, blockPos);
 				cir.setReturnValue(true);
 			}
 		}
@@ -60,8 +59,7 @@ public class ItemBlockMixin {
 		Block<?> block = world.getBlockType(targetPos);
 		if (itemStack.getItem().equals(Blocks.TORCH_REDSTONE_ACTIVE.asItem())) {
 			if (BlockLogicFan.isFan(block)) {
-				BlockLogicFan logic = (BlockLogicFan) block.getLogic();
-				logic.toggleInverted(world, targetPos);
+				BlockLogicFan.toggleInverted(world, targetPos);
 				cir.cancel();
 			}
 		}

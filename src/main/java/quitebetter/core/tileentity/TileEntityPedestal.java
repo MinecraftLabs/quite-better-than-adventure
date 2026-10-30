@@ -75,9 +75,9 @@ public class TileEntityPedestal extends TileEntity  {
 		super.dropContents(world, x, y, z);
 		if (this.displayItem != null) {
 			EntityItem item = world.dropItem(new TilePos(x, y, z), this.displayItem);
-			item.xd *= (double)0.5F;
-			item.yd *= (double)0.5F;
-			item.zd *= (double)0.5F;
+			item.xd *= 0.5;
+			item.yd *= 0.5;
+			item.zd *= 0.5;
 			item.pickupDelay = 0;
 		}
 

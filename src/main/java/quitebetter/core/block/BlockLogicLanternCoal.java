@@ -5,17 +5,13 @@ import net.minecraft.core.block.BlockLogic;
 import net.minecraft.core.block.Blocks;
 import net.minecraft.core.block.entity.TileEntity;
 import net.minecraft.core.block.material.Material;
-import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.item.ItemStack;
-import net.minecraft.core.util.phys.AABB;
 import net.minecraft.core.world.World;
-import net.minecraft.core.world.WorldSource;
 import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class BlockLogicLanternCoal extends BlockLogic {
@@ -49,7 +45,7 @@ public class BlockLogicLanternCoal extends BlockLogic {
 	public void onNeighborChanged(World world, TilePosc tilePos, Block<?> block) {
 		super.onNeighborChanged(world, tilePos, block);
 		if (!this.canStay(world, tilePos)) {
-			this.dropWithCause(world, EnumDropCause.WORLD, tilePos, world.getBlockData(tilePos), (TileEntity)null, (Player)null);
+			this.dropWithCause(world, EnumDropCause.WORLD, tilePos, world.getBlockData(tilePos), null, null);
 			world.setBlockTypeNotify(tilePos, Blocks.AIR);
 		}
 	}
@@ -66,10 +62,10 @@ public class BlockLogicLanternCoal extends BlockLogic {
 
 	@Override
 	public void animationTick(World world, TilePosc tilePos, Random rand) {
-		double xPos = (double)tilePos.x() + (double)0.5F;
+		double xPos = (double)tilePos.x() + 0.5;
 		double yPos = (double)tilePos.y() + 0.6;
-		double zPos = (double)tilePos.z() + (double)0.5F;
-		world.spawnParticle("smoke", xPos, yPos, zPos, (double)0.0F, (double)0.0F, (double)0.0F, 0, false);
-		world.spawnParticle("flame", xPos, yPos, zPos, (double)0.0F, (double)0.0F, (double)0.0F, 0, false);
+		double zPos = (double)tilePos.z() + 0.5;
+		world.spawnParticle("smoke", xPos, yPos, zPos, 0.0, 0.0, 0.0, 0, false);
+		world.spawnParticle("flame", xPos, yPos, zPos, 0.0, 0.0, 0.0, 0, false);
 	}
 }

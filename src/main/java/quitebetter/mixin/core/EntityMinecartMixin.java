@@ -12,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static quitebetter.core.ModCore.LOGGER;
-
 @Mixin(
 	value = {EntityMinecart.class},
 	remap = false
@@ -29,7 +27,7 @@ public class EntityMinecartMixin {
 		ItemStack heldstack = player.getCurrentEquippedItem();
 		if (heldstack!=null && heldstack.getItem().equals(Items.ROPE)) {
 			CompoundTag data = heldstack.getData();
-			Integer firstCart = data.getInteger("MinecartConnectionFirstID");
+			int firstCart = data.getInteger("MinecartConnectionFirstID");
 			player.swingItem();
 			if (firstCart == 0) { //FIRST
 				data.putInt("MinecartConnectionFirstID", cart.id);
@@ -39,7 +37,6 @@ public class EntityMinecartMixin {
 						cart.x = entity.x;
 						cart.y = entity.y;
 						cart.z = entity.z;
-						LOGGER.info(firstCart+" "+entity.id);
 					}
 				}
 			} else {

@@ -21,7 +21,6 @@ import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 import quitebetter.core.block.BlockLogicCrate;
 import quitebetter.core.item.ModItems;
-import quitebetter.core.util.BaseUtil;
 import quitebetter.core.util.IBasketContents;
 import quitebetter.core.util.PlayerUtil;
 import net.minecraft.core.block.entity.TileEntityBasket;
@@ -39,7 +38,6 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 	public Integer itemMaxStack; //Item stack max size
 	public Integer upperHeight; //Y cord of upper crate
 	public Integer lowerHeight; //Y cord of lower crate
-	public boolean glued = false; //Is glued
 
 	private boolean isCrateConnectable(int yo) {
 		assert worldObj != null;
@@ -48,17 +46,11 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			worldObj.getBlockType(pos).id() == worldObj.getBlockType(tilePos).id() &&
 			worldObj.getBlockData(pos) == worldObj.getBlockData(tilePos) &&
 			worldObj.getTileEntity(pos) != null &&
-			!((TileEntityCrate) worldObj.getTileEntity(pos)).glued
+			!((TileEntityCrate) worldObj.getTileEntity(pos)).isGlued()
 		);
 	}
 
 	//DATA
-
-	public boolean hasEqualDataTo(TileEntityCrate crate) {
-		return this.hasItemData() &&
-			this.itemID.equals(crate.itemID) &&
-			this.itemMeta.equals(crate.itemMeta);
-	}
 
 	public boolean hasEqualItemDataTo(TileEntityCrate crate) {
 		return this.hasItemData() &&
@@ -80,17 +72,17 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		passcrate.maxItemCount = this.maxItemCount;
 		passcrate.upperHeight = this.upperHeight;
 		passcrate.lowerHeight = this.lowerHeight;
-		this.sendPacketsForCrates();
+		this.markCratesChanged();
 	}
 
 	//VISUAL
 
 	public void emitParticles(ItemStack stack) {
-		Random rand = new Random();
+		Random rand = worldObj.rand;
 		if (stack != null) {
-			if (stack.getItem() instanceof ItemBlock) {
+			if (stack.getItem() instanceof ItemBlock<?>) {
 				for (int j = 0; j < 5; ++j) {
-					BaseUtil.spawnParticle(worldObj,
+					worldObj.spawnParticle(
 						"block",
 						this.tilePos.x + rand.nextFloat(),
 						this.tilePos.y + rand.nextFloat(),
@@ -98,11 +90,11 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
-						BlockParticleHelper.encodeBlockData(stack.itemID, stack.getMetadata(), Side.NORTH));
+						BlockParticleHelper.encodeBlockData(stack.itemID, stack.getMetadata(), Side.NORTH), true);
 				}
 			} else {
 				for (int j = 0; j < 5; ++j) {
-					BaseUtil.spawnParticle(worldObj,
+					worldObj.spawnParticle(
 						"item",
 						this.tilePos.x + rand.nextFloat(),
 						this.tilePos.y + rand.nextFloat(),
@@ -110,12 +102,12 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
 						(double) (rand.nextInt(11) - 5) / 10,
-						stack.itemID);
+						stack.itemID, true);
 				}
 			}
 		} else {
 			for (int j = 0; j < 3; ++j) {
-				BaseUtil.spawnParticle(worldObj, "smoke", this.tilePos.x + rand.nextFloat(), this.tilePos.y + rand.nextFloat(), this.tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, 0);
+				worldObj.spawnParticle("smoke", this.tilePos.x + rand.nextFloat(), this.tilePos.y + rand.nextFloat(), this.tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, (double) (rand.nextInt(11) - 5) / 100, 0, true);
 			}
 		}
 	}
@@ -125,10 +117,10 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 	public void emitSound(boolean success) {
 		assert worldObj != null;
 		if (success) {
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "random.equip", 0.5F, 2F);
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 0.5F);
+			worldObj.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "random.equip", 0.5F, 2F);
+			worldObj.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 0.5F);
 		} else {
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 2F);
+			worldObj.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "step.wood", 0.5F, 2F);
 		}
 	}
 
@@ -229,7 +221,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			success = false;
 			if (isCrateConnectable(yi)) {
 				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(new TilePos(tilePos.x, yi, tilePos.z));
-				if (!tile.hasItemData() || tile.hasEqualDataTo(this)) {
+				if (!tile.hasItemData() || tile.hasEqualItemDataTo(this)) {
 					if (this.upperHeight - this.lowerHeight + 1 < maxCrates) {
 						success = true;
 					}
@@ -246,7 +238,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			success = false;
 			if (isCrateConnectable(yi)) {
 				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(new TilePos(tilePos.x, yi, tilePos.z));
-				if (!tile.hasItemData() || tile.hasEqualDataTo(this)) {
+				if (!tile.hasItemData() || tile.hasEqualItemDataTo(this)) {
 					if (this.upperHeight - this.lowerHeight + 1 < maxCrates) {
 						success = true;
 					}
@@ -270,7 +262,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 				}
 			}
 		}
-		sendPacketsForCrates();
+		markCratesChanged();
 	}
 
 	//BREAK RESULT
@@ -316,7 +308,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 
 	public static boolean canUseToTake(ItemStack stack) {
 		Integer[] itemids = {Items.BASKET.id, ModItems.PEDESTAL.id, Items.PAINTBRUSH.id};
-		return stack == null || !Arrays.asList(itemids).contains(stack.itemID) && (!(stack.getItem() instanceof ItemBlock) || !(BlockLogicCrate.isCrate(((ItemBlock) stack.getItem()).getBlock())));
+		return stack == null || !Arrays.asList(itemids).contains(stack.itemID) && (!(stack.getItem() instanceof ItemBlock<?> itemBlock) || !BlockLogicCrate.isCrate(itemBlock.getBlock()));
 	}
 
 	public ItemStack pushStack(ItemStack stack) {
@@ -346,7 +338,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 						tile.itemCount += stack.stackSize - countcorr;
 						stack.stackSize = Math.max(countcorr, 0);
 						success = true;
-						sendTilePacket(pos);
+						markChanged(pos);
 						if (stack.stackSize > 0) {
 							continue loop;
 						}
@@ -360,7 +352,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 				emitParticles(null);
 				emitSound(false);
 			}
-			sendPacketsForCrates();
+			markCratesChanged();
 			return stack;
 		}
 		return null;
@@ -369,17 +361,11 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 	public void pushItems(Player player) {
 		ItemStack heldstack = player.getCurrentEquippedItem();
 		//INTERACTION
-		if (this.glued) {
+		if (this.isGlued()) {
 			return;
 		}
 		if (!this.hasItemData() && heldstack != null && heldstack.getItem().equals(Items.SLIMEBALL) && player.isSneaking()) {
-			Random rand = new Random();
-			for (int j = 0; j < 4; ++j) {
-				BaseUtil.spawnParticle(worldObj, "item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id);
-			}
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
-			this.glued = true;
-			sendTilePacket(this.tilePos);
+			this.applyGlue();
 			return;
 		}
 		//INIT
@@ -400,9 +386,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 				ItemStack stack = player.inventory.getItem(index);
 				pushStack(player.getGamemode() == Gamemodes.CREATIVE ? stack.copy() : stack);
 				if (player.getGamemode() != Gamemodes.CREATIVE) {
-					PlayerUtil.inventorySetSlot(player, index, (ItemStack) (
-						stack.stackSize > 0 ? stack : null
-					));
+					player.inventory.setItem(index, stack.stackSize > 0 ? stack : null);
 				}
 			}
 		} else {
@@ -431,15 +415,13 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 								if (stack.stackSize > 0) {
 									continue loop;
 								}
-								sendTilePacket(pos);
+								markChanged(pos);
 								tile.emitParticles(stack);
 								success = true;
 							}
 						}
 					}
-					PlayerUtil.inventorySetSlot(player, index, (ItemStack) (
-						stack.stackSize > 0 ? stack : null
-					));
+					player.inventory.setItem(index, stack.stackSize > 0 ? stack : null);
 					index = PlayerUtil.findSlotInInventory(player, Item.getItem(this.itemID), this.itemMeta);
 					if (index != null) {
 						stack = player.inventory.getItem(index);
@@ -447,14 +429,14 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 						stack = null;
 					}
 				} while (stack != null && success);
-				sendPacketsForCrates();
+				markCratesChanged();
 				emitSound(true);
 				player.inventory.setChanged();
 				return;
 			}
 		}
 		player.inventory.setChanged();
-		sendPacketsForCrates();
+		markCratesChanged();
 		emitSound(false);
 	}
 
@@ -464,25 +446,25 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 
 	public ItemStack takeStack() {
 		this.checkStorageHeights();
-		if (this.glued) {
+		if (this.isGlued()) {
 			return null;
 		}
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
-			if (isCrateConnectable(yi) && worldObj.getTileEntity(pos) instanceof TileEntityCrate && (((TileEntityCrate) worldObj.getTileEntity(pos)).itemCount > 0)) {
-				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
+			TileEntity tileEntity = worldObj.getTileEntity(pos);
+			if (isCrateConnectable(yi) && tileEntity instanceof TileEntityCrate tile && tile.itemCount > 0) {
 				int maxStackSize = (new ItemStack(tile.itemID, 1, tile.itemMeta)).getMaxStackSize();
 				int amount = Math.min(tile.itemCount, maxStackSize);
 				tile.itemCount -= amount;
 				ItemStack stack = new ItemStack(tile.itemID, amount, tile.itemMeta);
 				emitParticles(stack);
-				sendTilePacket(pos);
+				markChanged(pos);
 				emitSound(true);
 				takeOutOfBasket();
 				return stack;
 			}
 		}
-		sendPacketsForCrates();
+		markCratesChanged();
 		emitSound(false);
 		return null;
 	}
@@ -500,7 +482,6 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			this.maxItemCount = maxSlots * this.itemMaxStack;
 			this.upperHeight = compoundTag.getInteger("UpperHeight");
 			this.lowerHeight = compoundTag.getInteger("LowerHeight");
-			this.glued = compoundTag.getBoolean("Glued");
 		}
 	}
 
@@ -522,7 +503,6 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		if (this.lowerHeight != null) {
 			compoundTag.putInt("LowerHeight", this.lowerHeight);
 		}
-		compoundTag.putBoolean("Glued", this.glued);
 	}
 
 	//BASKET INTERACTION
@@ -533,8 +513,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			return;
 		}
 		TilePos basketPos = new TilePos(tile.tilePos.x, tile.tilePos.y + 1, tile.tilePos.z);
-		if (this.worldObj.getTileEntity(basketPos) != null && this.worldObj.getTileEntity(basketPos) instanceof TileEntityBasket) {
-			TileEntityBasket basket = (TileEntityBasket) this.worldObj.getTileEntity(basketPos);
+		if (this.worldObj.getTileEntity(basketPos) instanceof TileEntityBasket basket) {
 			((IBasketContents) basket).quitebetter$transferContents(stack -> {
 				ItemStack stackcorr = tile.pushStack(stack);
 				if (stackcorr != null) {
@@ -542,30 +521,13 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 				}
 				return stackcorr;
 			});
-			tile.sendPacketsForCrates();
-		}
-	}
-
-	//GLUABLE
-
-	@Override
-	public void applyGlue() {
-		Random rand = new Random();
-		assert worldObj != null;
-		if (!this.glued) {
-			this.glued = true;
-			this.setChanged();
-
-			for (int j = 0; j < 4; ++j) {
-				worldObj.spawnParticle("item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id, false);
-			}
-			worldObj.playSoundEffect((Entity) null, SoundCategory.WORLD_SOUNDS, tilePos.x, tilePos.y, tilePos.z, "mob.slimeattack", 0.25F, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
+			tile.markCratesChanged();
 		}
 	}
 
 	//SERVER-SIDE
 
-	public void sendTilePacket(TilePosc pos) {
+	public void markChanged(TilePosc pos) {
 		if (worldObj != null && !worldObj.isClientSide) {
 			TileEntity tile = worldObj.getTileEntity(pos);
 			if (tile != null) {
@@ -574,11 +536,11 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		}
 	}
 
-	public void sendPacketsForCrates() {
+	public void markCratesChanged() {
 		if (this.upperHeight!=null && this.lowerHeight!=null) {
 			assert worldObj != null;
 			for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
-				sendTilePacket(new TilePos(tilePos.x, yi, tilePos.z));
+				markChanged(new TilePos(tilePos.x, yi, tilePos.z));
 			}
 		}
 	}

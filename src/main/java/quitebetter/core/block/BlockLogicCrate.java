@@ -2,25 +2,18 @@ package quitebetter.core.block;
 
 import net.minecraft.core.block.Blocks;
 import net.minecraft.core.block.entity.TileEntityActivator;
-import net.minecraft.core.block.entity.TileEntityMeshGold;
 import net.minecraft.core.block.tag.BlockTags;
-import net.minecraft.core.entity.Entity;
 import net.minecraft.core.item.Items;
-import net.minecraft.core.net.packet.PacketBlockUpdate;
-import net.minecraft.core.net.packet.PacketTileEntityData;
-import net.minecraft.core.sound.SoundCategory;
 import net.minecraft.core.util.helper.Direction;
-import org.jetbrains.annotations.NotNull;
 import quitebetter.core.tileentity.TileEntityCrate;
 import quitebetter.core.util.ILeftClickable;
 import quitebetter.core.util.IRightClickable;
-import quitebetter.core.util.PlayerUtil;
 import net.minecraft.core.block.Block;
 import net.minecraft.core.block.BlockLogic;
+import net.minecraft.core.entity.EntityItem;
 import net.minecraft.core.block.IPaintable;
 import net.minecraft.core.block.entity.TileEntity;
 import net.minecraft.core.block.material.Material;
-import net.minecraft.core.entity.EntityItem;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.item.ItemStack;
@@ -30,12 +23,9 @@ import net.minecraft.core.world.World;
 import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
-import turniplabs.halplibe.helper.EnvironmentHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
-import static quitebetter.core.ModCore.LOGGER;
 
 public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClickable, IRightClickable {
 	public BlockLogicCrate(Block<?> block, Material material) {
@@ -43,9 +33,9 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 		block.withEntity(TileEntityCrate::new);
 	}
 
-	public static boolean isCrate(Block block) {
-		Block[] fans = {ModBlocks.CRATE,ModBlocks.CRATE_PAINTED};
-		return block != null && Arrays.asList(fans).contains(block);
+	public static boolean isCrate(Block<?> block) {
+		Block<?>[] crates = {ModBlocks.CRATE,ModBlocks.CRATE_PAINTED};
+		return block != null && Arrays.asList(crates).contains(block);
 	}
 
 	//ACTIVATOR
@@ -54,12 +44,11 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	public void onActivatorInteracted(World world, TilePosc tilePos, TileEntityActivator activator, Direction direction) {
 		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		TilePos frontPos = tilePos.add(direction, new TilePos());
-		Block front = world.getBlockType(frontPos);
-		TileEntity frontTile = world.getTileEntity(frontPos);
+		Block<?> front = world.getBlockType(frontPos);
 		if (tile!=null) {
 			ItemStack activeStack = activator.getItem(activator.stackSelector);
 			if (tile.hasItemData()) {
-				if (TileEntityCrate.canUseToTake(activeStack) && (front==null || front.hasTag(BlockTags.PLACE_OVERWRITES) || front.equals(Blocks.MESH))) {
+				if (TileEntityCrate.canUseToTake(activeStack) && (front.hasTag(BlockTags.PLACE_OVERWRITES) || front.equals(Blocks.MESH))) {
 					ItemStack stack = tile.takeStack();
 					if (stack!=null) {
 						world.entityJoinedWorld(new EntityItem(world, frontPos.x(),frontPos.y(),frontPos.z(), stack));
@@ -74,7 +63,7 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	@Override
 	public boolean preventsBreaking(World world, TilePosc tilePos, Player player, Side side) {
 		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
-		return tile!=null && !tile.glued && tile.itemID !=null && !player.isSneaking();
+		return tile!=null && !tile.isGlued() && tile.itemID !=null && !player.isSneaking();
 	}
 
 	@Override
@@ -83,7 +72,8 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 		if (tile!=null && (player.getHeldItem()==null || TileEntityCrate.canUseToTake(player.getHeldItem())) ) {
 			ItemStack stack = tile.takeStack();
 			if (stack != null) {
-				if (PlayerUtil.storeItemStack(player, stack) == -1) {
+				player.inventory.insertItem(stack, true);
+				if (stack.stackSize > 0) {
 					world.entityJoinedWorld(new EntityItem(world, player.x, player.y, player.z, stack));
 				}
 			}
@@ -95,17 +85,17 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 	@Override
 	public boolean preventsInteraction(World world, TilePosc tilePos, Player player, Side side) {
 		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
-		return tile!=null && !tile.glued && (tile.itemID !=null || player.getHeldItem()!=null && player.getHeldItem().getItem().equals(Items.SLIMEBALL) || !player.isSneaking()) && (player.getHeldItem()!=null && TileEntityCrate.canUseToTake(player.getHeldItem()));
+		return tile!=null && !tile.isGlued() && (tile.itemID !=null || player.getHeldItem()!=null && player.getHeldItem().getItem().equals(Items.SLIMEBALL) || !player.isSneaking()) && (player.getHeldItem()!=null && TileEntityCrate.canUseToTake(player.getHeldItem()));
 	}
 
 	@Override
 	public void onBlockRightClicked(World world, TilePosc tilePos, Player player, Side side) {
 		TileEntityCrate tile = (TileEntityCrate) world.getTileEntity(tilePos);
 		if (tile != null) {
-			if (EnvironmentHelper.isSingleplayerClient() || EnvironmentHelper.isMultiplayerServer()) {
+			if (!world.isClientSide) {
 				tile.pushItems(player);
 			} else {
-				if (!tile.glued) {
+				if (!tile.isGlued()) {
 					player.swingItem();
 				}
 			}
@@ -121,7 +111,6 @@ public class BlockLogicCrate extends BlockLogic implements IPaintable, ILeftClic
 			result = ((TileEntityCrate)tileEntity).getBreakResult();
 		}
 		result.add(new ItemStack(this.block, 1, meta));
-		EntityItem.enableItemClumping = true;
 		return result.toArray(new ItemStack[]{});
 	}
 

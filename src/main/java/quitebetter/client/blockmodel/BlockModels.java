@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.block.model.*;
 import net.minecraft.client.render.block.model.generic.BlockModelGenericTorch;
+import net.minecraft.core.block.Block;
 import net.minecraft.core.util.helper.Side;
 
 import static quitebetter.core.ModCore.MOD_ID;
@@ -17,8 +18,11 @@ public class BlockModels {
 	private static String PathTo(String folder, String texture) {
 		return MOD_ID+":block/"+folder+"/"+texture;
 	}
-	private static String PathTo(String namespace, String folder, String texture) {
-		return namespace+":block/"+folder+"/"+texture;
+	private static BlockModelSupports<?> supports(Block<?> block, String material) {
+		BlockModelSupports<?> model = new BlockModelSupports<>(block);
+		model.setTex(PathTo("support", material + "_top"), Side.TOP, Side.BOTTOM);
+		model.setTex(PathTo("support", material), Side.NORTH, Side.EAST, Side.SOUTH, Side.WEST);
+		return model;
 	}
 
 	public static void Setup(BlockModelDispatcher d) {
@@ -43,9 +47,9 @@ public class BlockModels {
 		d.addDispatch(new BlockModelFan<>(ModBlocks.IN_FAN,false,true));
 		d.addDispatch(new BlockModelFan<>(ModBlocks.ACTIVE_IN_FAN,true,true));
 		//SUPPORTS
-		d.addDispatch(new BlockModelSupports<>(ModBlocks.SUPPORT_STEEL).setTex(PathTo("support","steel_top"), Side.TOP, Side.BOTTOM).setTex(PathTo("support","steel"), Side.NORTH, Side.EAST, Side.SOUTH, Side.WEST));
-		d.addDispatch(new BlockModelSupports<>(ModBlocks.SUPPORT_IRON).setTex(PathTo("support","iron_top"), Side.TOP, Side.BOTTOM).setTex(PathTo("support","iron"), Side.NORTH, Side.EAST, Side.SOUTH, Side.WEST));
-		d.addDispatch(new BlockModelSupports<>(ModBlocks.SUPPORT_WOOD).setTex(PathTo("support","wood_top"), Side.TOP, Side.BOTTOM).setTex(PathTo("support","wood"), Side.NORTH, Side.EAST, Side.SOUTH, Side.WEST));
+		d.addDispatch(supports(ModBlocks.SUPPORT_STEEL, "steel"));
+		d.addDispatch(supports(ModBlocks.SUPPORT_IRON, "iron"));
+		d.addDispatch(supports(ModBlocks.SUPPORT_WOOD, "wood"));
 		//GLOWING MUSHROOM
 		d.addDispatch(new BlockModelCrossedSquares<>(ModBlocks.MUSHROOM_GLOWING).setAllTextures(PathTo("mushroom_glowing")));
 		//PEDESTAL

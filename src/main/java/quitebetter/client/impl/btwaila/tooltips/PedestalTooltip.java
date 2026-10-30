@@ -18,7 +18,7 @@ public class PedestalTooltip extends TileTooltip<TileEntityPedestal> {
 		c.setOffY(lineY);
 		c.drawItemList(new ItemStack[]{pedestal.displayItem}, 0);
 		c.setOffY(lineY);
-		c.drawStringWithShadow(""+pedestal.displayItem.getDisplayName(), 18);
+		c.drawStringWithShadow(pedestal.displayItem.getDisplayName(), 18);
 		c.setOffY(lineY + 16);
 	}
 }

@@ -7,44 +7,33 @@
   },
   "plugin": "quitebetter.mixin.MixinConfig",
   "mixins": [
-    "core.BlockLogicMixin",
     "core.BlockLogicMushroomMixin",
+    "core.BlockLogicFlagMixin",
     "core.ChunkDecoratorOverworldMixin",
     "core.EntityFallingBlockMixin",
     "core.EntityMinecartMixin",
     "core.FishingBobberMixin",
     "core.PlayerMixin",
     "core.TileEntityBasketMixin",
-    "core.feature.CherryTreeFancyMixin",
-    "core.feature.TreeCaatingaMixin",
-    "core.feature.TreeEucalyptusMixin",
-    "core.feature.TreeFancyMixin",
+    "core.feature.WorldFeatureTreeGrowthMixin",
     "core.feature.TreeFancyRainforestMixin",
-    "core.feature.TreePalmMixin",
-    "core.feature.TreeShapeSwampMixin",
-    "core.feature.TreeShrubMixin",
-    "core.feature.TreeTaigaBushyMixin",
-    "core.feature.TreeTallMixin",
     "core.feature.WorldFeatureLabyrinthMixin",
     "core.glued.BlockLogicDoorMixin",
     "core.glued.BlockLogicNoteMixin",
     "core.glued.BlockLogicTrapdoorMixin",
     "core.item.ItemBlockMixin",
     "core.item.ItemBowMixin",
-    "core.item.ItemFishingRodMixin",
     "core.item.ItemFlagMixin",
     "core.item.ItemSlimeballMixin"
   ],
   "client": [
     "client.BlockModelRopeMixin",
-    "client.MinecraftMixin",
     "client.PlayerControllerMixin",
     "client.PlayerControllerSPMixin",
-    "client.TextureMagangerMixin",
+    "client.TextureManagerMixin",
     "client.TileEntityRendererFlagMixin"
   ],
   "server": [
-    "server.MinecraftServerMixin",
     "server.PacketHandlerServerMixin"
   ]
 }

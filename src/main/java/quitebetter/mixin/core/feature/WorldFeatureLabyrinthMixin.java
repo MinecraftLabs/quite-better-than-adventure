@@ -1,12 +1,7 @@
 package quitebetter.mixin.core.feature;
 
-import net.minecraft.core.WeightedRandomBag;
-import net.minecraft.core.WeightedRandomLootObject;
 import net.minecraft.core.block.Blocks;
 import net.minecraft.core.block.entity.TileEntityChest;
-import net.minecraft.core.block.material.Material;
-import net.minecraft.core.block.material.Materials;
-import net.minecraft.core.block.tag.BlockTags;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.helper.Axis;
 import net.minecraft.core.util.helper.Direction;
@@ -31,16 +26,6 @@ import java.util.Random;
 )
 public class WorldFeatureLabyrinthMixin {
 	@Shadow
-	int dungeonSize;
-	@Shadow
-	int dungeonLimit;
-	@Shadow
-	int dungeonCount;
-	@Shadow
-	boolean treasureGenerated;
-	@Shadow
-	boolean libraryGenerated;
-	@Shadow
 	boolean isCold;
 	@Shadow
 	int wallBlockA;
@@ -52,65 +37,17 @@ public class WorldFeatureLabyrinthMixin {
 	int brickBlockB;
 	@Shadow
 	int slabBlock;
-	@Shadow
-	int pressurePlateBlock;
-	@Shadow
-	public ItemStack treasureItem;
-	@Shadow
-	public WeightedRandomBag<WeightedRandomLootObject> chestLoot;
-	@Shadow
-	public WeightedRandomBag<WeightedRandomLootObject> dispenserLoot;
-	@Shadow
-	public WeightedRandomBag<String> spawnerMonsters;
-	//METHOD COPIES
-	@Unique
-	private boolean canReplace(World world, TilePosc tilePos) {
-		int y = tilePos.y();
-		if (y <= 11) {
-			return false;
-		} else {
-			int block = world.getBlockType(tilePos).id();
-			if (block == this.brickBlockA
-				|| block == Blocks.PLANKS_OAK.id()
-				|| block == Blocks.COBWEB.id()
-				|| block == Blocks.BOOKSHELF_PLANKS_OAK.id()
-				|| block == Blocks.MOBSPAWNER.id()
-				|| block == this.brickBlockB) {
-				return false;
-			} else if (block != Blocks.MOTION_SENSOR_IDLE.id() && block != Blocks.MOTION_SENSOR_ACTIVE.id() && block != Blocks.DISPENSER_COBBLE_STONE.id()) {
-				Material material = world.getBlockMaterial(tilePos);
-				return BlockTags.CAVES_CUT_THROUGH.appliesTo(Blocks.getBlock(block))
-					|| material == Materials.GRASS
-					|| material == Materials.DIRT
-					|| material.isStone()
-					|| material == Materials.SAND
-					|| material == Materials.MOSS;
-			} else {
-				world.removeTileEntity(tilePos);
-				if (block == Blocks.DISPENSER_COBBLE_STONE.id()
-					&& (world.getBlockData(tilePos) & 7) == Direction.UP.id
-					&& world.getBlockType(tilePos.up(new TilePos())).id() == this.pressurePlateBlock) {
-					world.setBlockTypeNotify(tilePos.up(new TilePos()), Blocks.AIR);
-				}
 
-				world.setBlockTypeNotify(tilePos, Blocks.AIR);
-				return true;
-			}
-		}
+	@Shadow
+	private boolean canReplace(World world, int x, int y, int z) {
+		throw new AssertionError();
 	}
-	@Unique
-	private ItemStack pickDispenserLootItem(Random random) {
-		return ((WeightedRandomLootObject)this.dispenserLoot.getRandom(random)).getItemStack(random);
-	}
-	@Unique
+
+	@Shadow
 	private ItemStack pickCheckLootItem(Random random) {
-		if (!this.treasureGenerated && this.dungeonSize > 7) {
-			this.treasureGenerated = true;
-			return this.treasureItem.copy();
-		} else {
-			return ((WeightedRandomLootObject)this.chestLoot.getRandom(random)).getItemStack(random);
-		}
+		throw new AssertionError();
 	}
+
 	//UNIQUE
 	@Unique
 	private boolean isRoomDirectionEmpty(World world, TilePosc tilePos, int roomsize, Direction dir) {
@@ -200,7 +137,7 @@ public class WorldFeatureLabyrinthMixin {
 						boolean xWallCheck = x == blockX - size || x == blockX + size;
 						boolean zWallCheck = z == blockZ - size || z == blockZ + size;
 						boolean yWallCheck = y == blockY - 2;
-						if (this.canReplace(world, new TilePos(x, y, z))) {
+						if (this.canReplace(world, x, y, z)) {
 							if (!xWallCheck && !zWallCheck) {
 								if (yWallCheck) {
 									if (random.nextInt(5) == 0) {

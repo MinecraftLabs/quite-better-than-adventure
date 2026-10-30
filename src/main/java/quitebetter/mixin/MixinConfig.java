@@ -15,7 +15,7 @@ public class MixinConfig implements IMixinConfigPlugin {
 
 	@Override
 	public String getRefMapperConfig() {
-		return "";
+		return null;
 	}
 
 	@Override

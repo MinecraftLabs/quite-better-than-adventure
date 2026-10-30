@@ -17,13 +17,11 @@ import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
 import quitebetter.core.block.BlockLogicAxisAlignedPainted;
-import quitebetter.core.block.BlockLogicCorrugatedIron;
 import quitebetter.core.util.BlockUtil;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import static quitebetter.core.ModCore.LOGGER;
 
 public class ItemWrench extends Item {
 
@@ -105,7 +103,7 @@ public class ItemWrench extends Item {
 	static int rotateStairs(int meta, Side side) {
 		BlockUtil.Stairs.StairsDirection dir = BlockUtil.Stairs.getDirection(meta);
 		Axis sax = side.axis();
-		Axis hdax = dir.hDir.axis();
+		Axis hdax = dir.hDir().axis();
 		BlockUtil.Stairs.StairsDirection sdir = null;
 		if (sax!=hdax) {
 			switch (sax) {
@@ -114,8 +112,8 @@ public class ItemWrench extends Item {
 					break;
 				case Y:
 					dir = new BlockUtil.Stairs.StairsDirection(
-						YAxisDirections[Arrays.asList(YAxisDirections).indexOf(dir.hDir)+1&3],
-						dir.vDir
+						YAxisDirections[Arrays.asList(YAxisDirections).indexOf(dir.hDir())+1&3],
+						dir.vDir()
 					);
 					break;
 				case Z:
@@ -147,9 +145,9 @@ public class ItemWrench extends Item {
 				)
 			);
 			success = true;
-		} else if (logic instanceof BlockLogicAxisAlignedPainted) {
+		} else if (logic instanceof BlockLogicAxisAlignedPainted painted) {
 			world.setBlockDataNotify(tilePos,
-				((BlockLogicAxisAlignedPainted) logic).stripAxisFromMetadata(meta) |
+				painted.stripAxisFromMetadata(meta) |
 					BlockLogicAxisAligned.axisToMeta(
 						rotateAxisAligned(BlockLogicAxisAlignedPainted.metaToAxis(meta), side)
 					)
@@ -187,7 +185,7 @@ public class ItemWrench extends Item {
 			success = true;
 		}
 		if (success) {
-			Random random = new Random();
+			Random random = world.rand;
 			world.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x(), tilePos.y(), tilePos.z(), "random.door_open", 0.25F, 3F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 		}
 		return success;

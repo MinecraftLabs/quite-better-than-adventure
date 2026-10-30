@@ -34,8 +34,8 @@ public class ItemModelSack extends ItemModelStandard {
 		}
 
 		int durability = 64-itemstack.getItemDamageForDisplay();
-		int barWidth = (int)Math.round((double)13.0F - (double)durability * (double)13.0F / (double)itemstack.getMaxDamage());
-		int progress = (int)Math.round((double)255.0F - (double)durability * (double)255.0F / (double)itemstack.getMaxDamage());
+		int barWidth = (int)Math.round(13.0 - (double)durability * 13.0 / (double)itemstack.getMaxDamage());
+		int progress = (int)Math.round(255.0 - (double)durability * 255.0 / (double)itemstack.getMaxDamage());
 		GLRenderer.pushFrame();
 		GLRenderer.disableState(State.DEPTH_TEST);
 		GLRenderer.setShader(Shaders.COLOR);

@@ -1,15 +1,12 @@
 package quitebetter.core.block;
 
 import net.minecraft.core.block.entity.TileEntity;
-import net.minecraft.core.entity.EntityItem;
 import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import quitebetter.core.tileentity.TileEntityCrate;
 import quitebetter.core.tileentity.TileEntityFan;
 import net.minecraft.core.block.*;
 import net.minecraft.core.block.material.Material;
-import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.Mob;
 import net.minecraft.core.sound.SoundCategory;
 import net.minecraft.core.util.helper.Direction;
@@ -20,7 +17,6 @@ import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -28,22 +24,16 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 	public static final int MASK_DIRECTION = 0b00000111;
 	public static final int MASK_SIGNALOVERRIDE = 0b00001000;
 	public boolean isActive;
-	public boolean isInverted;
-
-	private int setbit(int data, int pos) { pos -= 1; data = data | (1 << pos); data |= 1 << pos; return data;}
-	private int unsetbit(int data, int pos) { pos -= 1; data = data & ~(1 << pos); data &= ~(1 << pos); return data;}
 
 	public boolean isSignalOverriden(World world, TilePosc tilePos) {
 		return (world.getBlockData(tilePos) & MASK_SIGNALOVERRIDE) != 0;
 	}
 
 	public void overrideSignal(World world, TilePosc tilePos) {
-		world.setBlockDataNotify(tilePos,
-			this.setbit(world.getBlockData(tilePos),4)
-		);
+		world.setBlockDataNotify(tilePos, world.getBlockData(tilePos) | MASK_SIGNALOVERRIDE);
 	}
 
-	public static boolean isInverted(Block fan) {
+	public static boolean isInverted(Block<?> fan) {
 		return fan.equals(ModBlocks.IN_FAN) || fan.equals(ModBlocks.ACTIVE_IN_FAN);
 	}
 
@@ -64,19 +54,18 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 			world.getBlockData(tilePos));
 	}
 
-	public static boolean isFan(Block block) {
-		Block[] fans = {ModBlocks.FAN,ModBlocks.ACTIVE_FAN,ModBlocks.IN_FAN,ModBlocks.ACTIVE_IN_FAN};
+	public static boolean isFan(Block<?> block) {
+		Block<?>[] fans = {ModBlocks.FAN,ModBlocks.ACTIVE_FAN,ModBlocks.IN_FAN,ModBlocks.ACTIVE_IN_FAN};
 		return block != null && Arrays.asList(fans).contains(block);
 	}
 
-	public BlockLogicFan(Block<?> block, Material material, boolean isActive, boolean isIn) {
+	public BlockLogicFan(Block<?> block, Material material, boolean isActive) {
 		super(block, material);
 		this.isActive = isActive;
-		this.isInverted = isIn;
 		block.withEntity(TileEntityFan::new);
 	}
 
-	private int getSightRange(World world, TilePosc tilePos, Direction facing) {
+	public static int getSightRange(World world, TilePosc tilePos, Direction facing) {
 		if (facing == Direction.NONE) {
 			return 0;
 		} else {
@@ -86,8 +75,7 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 				int x1 = MathHelper.round(tilePos.x() + (double)(facing.offsetX() * i));
 				int y1 = MathHelper.round(tilePos.y() + (double)(facing.offsetY() * i));
 				int z1 = MathHelper.round(tilePos.z() + (double)(facing.offsetZ() * i));
-				int id = world.getBlockType(queryPos.set(x1, y1, z1)).id();
-				if (Blocks.solid[id]) {
+				if (world.getBlockType(queryPos.set(x1, y1, z1)).solid()) {
 					return i - 1;
 				}
 			}
@@ -100,18 +88,17 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 		if (this.isActive) {
 			if (this.isModifierFire(world,tilePos)) {
 				Direction dir = getDirection(world.getBlockData(tilePos));
-				int len = this.getSightRange(world, tilePos, dir);
+				int len = getSightRange(world, tilePos, dir);
 				for (int i=1;i<5;i++) {
 					double xPos = (double) tilePos.x() + (double) rand.nextFloat();
-					double yPos = (double) tilePos.y() + (double) rand.nextFloat() * (double) 0.5F;
+					double yPos = (double) tilePos.y() + (double) rand.nextFloat() * 0.5;
 					double zPos = (double) tilePos.z() + (double) rand.nextFloat();
-					world.spawnParticle("flame", xPos + dir.offsetX()*getSightRange(world,tilePos,dir)*rand.nextFloat(), yPos + dir.offsetY()*getSightRange(world,tilePos,dir)*rand.nextFloat(), zPos + dir.offsetZ()*getSightRange(world,tilePos,dir)*rand.nextFloat(), 0, 0, 0, 0, false);
+					world.spawnParticle("flame", xPos + dir.offsetX()*len*rand.nextFloat(), yPos + dir.offsetY()*len*rand.nextFloat(), zPos + dir.offsetZ()*len*rand.nextFloat(), 0, 0, 0, 0, false);
 				}
 			} else {
 				Direction dir = getDirection(world.getBlockData(tilePos));
-				int len = this.getSightRange(world, tilePos, dir);
 				double xPos = (double) tilePos.x() + (double) rand.nextFloat();
-				double yPos = (double) tilePos.y() + (double) rand.nextFloat() * (double) 0.5F;
+				double yPos = (double) tilePos.y() + (double) rand.nextFloat() * 0.5;
 				double zPos = (double) tilePos.z() + (double) rand.nextFloat();
 				world.spawnParticle("smoke", xPos + dir.offsetX() * 1.3, yPos + dir.offsetY() * 1.3, zPos + dir.offsetZ() * 1.3, 0, 0, 0, 0, false);
 			}
@@ -122,7 +109,7 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 	public void setActive(World world, TilePosc tilePos, boolean isActive) {
 		world.setBlockTypeDataNotify(tilePos,(( isSignalOverriden(world, tilePos) || isActive ) ? (isInverted(block) ? ModBlocks.ACTIVE_IN_FAN : ModBlocks.ACTIVE_FAN) : (isInverted(block) ? ModBlocks.IN_FAN : ModBlocks.FAN)), world.getBlockData(tilePos));
 		if (isActive) {
-			world.playSoundEffect((Entity)null, SoundCategory.WORLD_SOUNDS, tilePos.x(), tilePos.y(), tilePos.z(),"fire.ignite", 0.1F, 2F);
+			world.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, tilePos.x(), tilePos.y(), tilePos.z(),"fire.ignite", 0.1F, 2F);
 		}
 	}
 
@@ -198,13 +185,13 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 		return meta & -8 | direction.id & 7;
 	}
 
-	public Block getModifierBlock(World world, TilePosc tilePos) {
+	public Block<?> getModifierBlock(World world, TilePosc tilePos) {
 		Direction dir = BlockLogicFan.getDirection(world.getBlockData(tilePos));
 		return world.getBlockType(tilePos.add(dir, new TilePos()));
 	}
 
 	public boolean isModifierFire(World world, TilePosc tilePos) {
-		Block block = getModifierBlock(world, tilePos);
+		Block<?> block = getModifierBlock(world, tilePos);
 		return block.equals(Blocks.FIRE) || block.equals(Blocks.BRAZIER_ACTIVE);
 	}
 

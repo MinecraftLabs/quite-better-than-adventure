@@ -2,9 +2,7 @@ package quitebetter.core.block;
 
 import net.minecraft.core.block.*;
 import net.minecraft.core.block.entity.TileEntity;
-import net.minecraft.core.block.material.Material;
 import net.minecraft.core.block.tag.BlockTags;
-import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.EntityFallingBlock;
 import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.item.ItemStack;
@@ -36,58 +34,6 @@ public class BlockLogicMudStairs extends BlockLogicStairs {
 		world.scheduleBlockUpdate(tilePos, this.block, this.tickDelay());
 	}
 
-	private boolean isWaterNearby(World world, TilePosc tilePos, int range) {
-		TilePos queryPos = new TilePos();
-		for(int x1 = tilePos.x() - range; x1 <= tilePos.x() + range; ++x1) {
-			for(int y1 = tilePos.y() - range; y1 <= tilePos.y() + range; ++y1) {
-				for(int z1 = tilePos.z() - range; z1 <= tilePos.z() + range; ++z1) {
-					if (Blocks.hasTag(world.getBlockType(queryPos.set(x1, y1, z1)), BlockTags.IS_WATER)) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private boolean isLavaNearby(World world, TilePosc tilePos) {
-		TilePos queryPos = new TilePos();
-		for(int x1 = tilePos.x() - 1; x1 <= tilePos.x() + 1; ++x1) {
-			for(int y1 = tilePos.y() - 1; y1 <= tilePos.y() + 1; ++y1) {
-				for(int z1 = tilePos.z() - 1; z1 <= tilePos.z() + 1; ++z1) {
-					if (Blocks.hasTag(world.getBlockType(queryPos.set(x1, y1, z1)), BlockTags.IS_LAVA)) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private boolean canBecomeWet(World world, TilePosc tilePos) {
-		if (this.isWaterNearby(world, tilePos, 1)) {
-			return true;
-		} else {
-			if (this.isWaterNearby(world, tilePos, 3)) {
-				TilePos queryPos = new TilePos();
-				for(int x1 = tilePos.x() - 1; x1 <= tilePos.x() + 1; ++x1) {
-					for(int y1 = tilePos.y() - 1; y1 <= tilePos.y() + 1; ++y1) {
-						for(int z1 = tilePos.z() - 1; z1 <= tilePos.z() + 1; ++z1) {
-							int bID = world.getBlockType(queryPos.set(x1, y1, z1)).id();
-							if (bID == Blocks.MUD.id() || bID == Blocks.FARMLAND_DIRT.id() && BlockLogicFarmland.isWet(world.getBlockData(queryPos))) {
-								return true;
-							}
-						}
-					}
-				}
-			}
-
-			return false;
-		}
-	}
-
 	@Override
 	public void onNeighborChanged(World world, TilePosc tilePos, Block<?> block) {
 		world.scheduleBlockUpdate(tilePos, this.block, this.tickDelay());
@@ -117,7 +63,7 @@ public class BlockLogicMudStairs extends BlockLogicStairs {
 						world.setBlockTypeNotify(queryPos.set(x, y, z), this.block);
 					}
 				} else {
-					EntityFallingBlock entityFallingBlock = new EntityFallingBlock(world, (double)x + (double)0.5F, (double)y + (double)0.5F, (double)z + (double)0.5F, this.block.id(), world.getBlockData(tilePos), (TileEntity)null);
+					EntityFallingBlock entityFallingBlock = new EntityFallingBlock(world, (double)x + 0.5, (double)y + 0.5, (double)z + 0.5, this.block.id(), world.getBlockData(tilePos), null);
 					world.entityJoinedWorld(entityFallingBlock);
 				}
 			}
@@ -132,13 +78,13 @@ public class BlockLogicMudStairs extends BlockLogicStairs {
 
 	@Override
 	public void updateTick(World world, TilePosc tilePos, Random rand, boolean isRandomTick) {
-		if (this.isHardened && !this.isLavaNearby(world, tilePos) && this.canBecomeWet(world, tilePos)) {
+		if (this.isHardened && !BlockLogicMudBlock.isLavaNearby(world, tilePos) && BlockLogicMudBlock.canBecomeWet(world, tilePos)) {
 			world.setBlockTypeDataNotify(tilePos, altBlock, world.getBlockData(tilePos));
-		} else if (!this.isHardened && (this.isLavaNearby(world, tilePos) || world.dimension == Dimension.NETHER)) {
-			world.playSoundEffect((Entity)null, SoundCategory.WORLD_SOUNDS, (double)tilePos.x() + (double)0.5F, (double)tilePos.y() + (double)0.5F, (double)tilePos.z() + (double)0.5F, "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+		} else if (!this.isHardened && (BlockLogicMudBlock.isLavaNearby(world, tilePos) || world.dimension == Dimension.NETHER)) {
+			world.playSoundEffect(null, SoundCategory.WORLD_SOUNDS, (double)tilePos.x() + 0.5, (double)tilePos.y() + 0.5, (double)tilePos.z() + 0.5, "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
 
 			for(int l = 0; l < 8; ++l) {
-				world.spawnParticle("largesmoke", (double)tilePos.x() + Math.random(), (double)tilePos.y() + Math.random(), (double)tilePos.z() + Math.random(), (double)0.0F, (double)0.0F, (double)0.0F, 0, false);
+				world.spawnParticle("largesmoke", (double)tilePos.x() + world.rand.nextDouble(), (double)tilePos.y() + world.rand.nextDouble(), (double)tilePos.z() + world.rand.nextDouble(), 0.0, 0.0, 0.0, 0, false);
 			}
 
 			world.setBlockTypeDataNotify(tilePos, altBlock, world.getBlockData(tilePos));

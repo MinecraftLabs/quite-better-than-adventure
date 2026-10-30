@@ -1,6 +1,5 @@
 package quitebetter.core.tool;
 
-import net.minecraft.core.block.Blocks;
 import net.minecraft.core.item.tool.ItemToolPickaxe;
 import quitebetter.core.block.ModBlocks;
 

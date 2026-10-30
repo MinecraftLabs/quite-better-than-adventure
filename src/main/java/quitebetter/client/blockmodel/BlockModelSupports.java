@@ -1,22 +1,19 @@
 package quitebetter.client.blockmodel;
 
 import net.minecraft.client.render.block.color.BlockColorDispatcher;
-import net.minecraft.client.render.block.model.BlockModelStandard;
+import net.minecraft.client.render.block.model.BlockModelAxisAligned;
 import net.minecraft.client.render.tessellator.TessellatorGeneral;
-import net.minecraft.client.render.texture.stitcher.IconCoordinate;
-import net.minecraft.client.render.texture.stitcher.TextureRegistry;
 import net.minecraft.core.block.Block;
 import net.minecraft.core.block.BlockLogic;
 import net.minecraft.core.block.BlockLogicAxisAligned;
 import net.minecraft.core.util.helper.Axis;
 import net.minecraft.core.util.helper.Side;
-import net.minecraft.core.util.helper.Sides;
 import net.minecraft.core.world.WorldSource;
 import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.joml.primitives.AABBdc;
 
-public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard<T> {
+public class BlockModelSupports<T extends BlockLogic> extends BlockModelAxisAligned<T> {
 
 	public BlockModelSupports(Block<T> block) {
 		super(block);
@@ -24,7 +21,7 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 
 	public boolean shouldRenderSide(WorldSource worldSource, TilePosc tilePos, Side side, int meta) {
 		Block<?> frontblock = worldSource.getBlockType(tilePos.add(side.opposite(), new TilePos()));
-		return (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (!frontblock.isCubeShaped()) );
+		return (!getRotatedSide(side, meta).isHorizontal() || (!frontblock.isCubeShaped()) );
 	}
 
 	@Override
@@ -36,19 +33,19 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 		AABBdc bounds = this.getBlockBoundsForItemRender();
 
 		tessellator.setNormal(0.0F, 1.0F, 0.0F);
-		renderBlocks.renderTopFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.TOP, metadata));
+		renderBlocks.renderTopFace(tessellator, bounds, 0.0, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.TOP, metadata));
 		tessellator.setNormal(0.0F, 0.0F, -1.0F);
-		renderBlocks.renderNorthFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.NORTH, metadata));
-		renderBlocks.renderNorthFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.99F, this.getBlockTextureFromSideAndMetadata(Side.NORTH, metadata));
+		renderBlocks.renderNorthFace(tessellator, bounds, 0.0, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.NORTH, metadata));
+		renderBlocks.renderNorthFace(tessellator, bounds, 0.0, 0.0, (double)0.99F, this.getBlockTextureFromSideAndMetadata(Side.NORTH, metadata));
 		tessellator.setNormal(0.0F, 0.0F, 1.0F);
-		renderBlocks.renderSouthFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.SOUTH, metadata));
-		renderBlocks.renderSouthFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)-0.99F, this.getBlockTextureFromSideAndMetadata(Side.SOUTH, metadata));
+		renderBlocks.renderSouthFace(tessellator, bounds, 0.0, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.SOUTH, metadata));
+		renderBlocks.renderSouthFace(tessellator, bounds, 0.0, 0.0, (double)-0.99F, this.getBlockTextureFromSideAndMetadata(Side.SOUTH, metadata));
 		tessellator.setNormal(-1.0F, 0.0F, 0.0F);
-		renderBlocks.renderWestFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.WEST, metadata));
-		renderBlocks.renderWestFace(tessellator, bounds, (double)0.99F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.WEST, metadata));
+		renderBlocks.renderWestFace(tessellator, bounds, 0.0, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.WEST, metadata));
+		renderBlocks.renderWestFace(tessellator, bounds, (double)0.99F, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.WEST, metadata));
 		tessellator.setNormal(1.0F, 0.0F, 0.0F);
-		renderBlocks.renderEastFace(tessellator, bounds, (double)0.0F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.EAST, metadata));
-		renderBlocks.renderEastFace(tessellator, bounds, (double)-0.99F, (double)0.0F, (double)0.0F, this.getBlockTextureFromSideAndMetadata(Side.EAST, metadata));
+		renderBlocks.renderEastFace(tessellator, bounds, 0.0, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.EAST, metadata));
+		renderBlocks.renderEastFace(tessellator, bounds, (double)-0.99F, 0.0, 0.0, this.getBlockTextureFromSideAndMetadata(Side.EAST, metadata));
 		tessellator.draw();
 		tessellator.offsetTranslation(0.5, 0.5, 0.5);
 	}
@@ -84,7 +81,7 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 		//OUTSIDE
 		for(Side side : Side.sides) {
 			Block<?> frontblock = worldSource.getBlockType(tilePos.add(side, new TilePos()));
-			if (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (!frontblock.isCubeShaped()) ) {
+			if (!getRotatedSide(side, meta).isHorizontal() || (!frontblock.isCubeShaped()) ) {
 				renderBlocks.renderSide(tessellator, worldSource, this, bounds, tilePos, r, g, b, side, meta);
 			}
 		}
@@ -108,14 +105,4 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 		return true;
 	}
 
-	@Override
-	public IconCoordinate getBlockTextureFromSideAndMetadata(Side side, int data) {
-		Side rotated = this.getRotatedSide(side, data);
-		return rotated == Side.NONE ? TextureRegistry.getTexture("minecraft:block/grass_top") : super.getBlockTextureFromSideAndMetadata(rotated, data);
-	}
-
-	public Side getRotatedSide(Side side, int data) {
-		int d = 6 * (data & 3) + side.id;
-		return d < Sides.orientationLookUpXYZAligned.length ? Side.fromId(Sides.orientationLookUpXYZAligned[d]) : Side.NONE;
-	}
 }

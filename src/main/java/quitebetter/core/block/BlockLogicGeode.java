@@ -4,7 +4,6 @@ import net.minecraft.core.block.Block;
 import net.minecraft.core.block.BlockLogic;
 import net.minecraft.core.block.entity.TileEntity;
 import net.minecraft.core.block.material.Material;
-import net.minecraft.core.entity.EntityItem;
 import net.minecraft.core.enums.EnumDropCause;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
@@ -23,8 +22,7 @@ public class BlockLogicGeode extends BlockLogic {
 			this.maxCount = maxCount;
 		}
 	}
-	public static GeodeDropEntry getDrop() {
-		Random random = new Random();
+	public static GeodeDropEntry getDrop(Random random) {
 		GeodeDropEntry[] opts = {
 			new GeodeDropEntry(Items.QUARTZ,6,16),
 			new GeodeDropEntry(Items.QUARTZ,6,16),
@@ -47,10 +45,8 @@ public class BlockLogicGeode extends BlockLogic {
 	@Override
 	public ItemStack @Nullable [] getBreakResult(World world, EnumDropCause dropCause, int meta, TileEntity tileEntity) {
 		if (dropCause==EnumDropCause.PISTON_CRUSH) {
-			Random rand = new Random();
-			GeodeDropEntry drop = getDrop();
-			EntityItem.enableItemClumping = true;
-			return new ItemStack[]{new ItemStack(drop.item,drop.minCount+rand.nextInt(drop.maxCount))};
+			GeodeDropEntry drop = getDrop(world.rand);
+			return new ItemStack[]{new ItemStack(drop.item,drop.minCount+world.rand.nextInt(drop.maxCount))};
 		}
 		return dropCause != EnumDropCause.IMPROPER_TOOL ? new ItemStack[]{new ItemStack(this.block)} : null;
 	}

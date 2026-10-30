@@ -71,7 +71,6 @@ public class PacketHandlerServerMixin {
 		)
 	)
 	public void startMining(ServerPlayerController controller, int x, int y, int z, Side side, Operation<Void> original) {
-		//LOGGER.info("Captured {} with action {}. Checking ILeftClickable.", packet.getClass().getName(),action);
 		TilePos tilePos = new TilePos(x, y, z);
 		WorldServer world = mcServer.getDimensionWorld(this.playerEntity.dimension);
 		if (this.handleLeftClick(world, tilePos, side)) {
@@ -122,7 +121,6 @@ public class PacketHandlerServerMixin {
 		)
 	)
 	public boolean useOrPlaceItemStackOnTile(ServerPlayerController controller, Player player, World world, ItemStack itemStack, int x, int y, int z, Side side, double xPlaced, double yPlaced, Operation<Boolean> original) {
-		//LOGGER.info("Captured {} with type {}. Checking IRightClickable.", packet.getClass().getName(),type);
 		TilePos tilePos = new TilePos(x, y, z);
 		if (this.handleRightClick(world, tilePos, side)) {
 			return true;

@@ -1,7 +1,6 @@
 package quitebetter.core.item;
 
 
-import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
@@ -11,6 +10,7 @@ import net.minecraft.core.util.helper.Side;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.block.Block;
+import net.minecraft.core.block.Blocks;
 
 public class ItemHook extends Item {
 
@@ -28,16 +28,16 @@ public class ItemHook extends Item {
 			blockPos.y() < player.y && player.yd < 0.1
 			&& distance <= 1.8
 		) {
-			if (block.id() == 110) { //WOOL
+			if (block == Blocks.WOOL) {
 				player.swingItem();
-				world.playSoundAtEntity((Entity)player, (Entity)player, "step.cloth", 0.1F, 2F / (itemRand.nextFloat() * 0.4F + 0.8F));
+				world.playSoundAtEntity(player, player, "step.cloth", 0.1F, 2F / (itemRand.nextFloat() * 0.4F + 0.8F));
 				return true;
 			} else {
 				world.playBlockEvent(player, blockPos, 2001, block.id());
 				player.yd = 0.5;
 				player.fallDistance = 0;
 				player.swingItem();
-				itemstack.damageItem(1, (Entity)player);
+				itemstack.damageItem(1, player);
 				return true;
 			}
 		}

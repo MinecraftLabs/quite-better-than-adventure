@@ -21,7 +21,7 @@ import java.util.Arrays;
 )
 public class BlockModelRopeMixin {
 	@Unique
-	public Block<?>[] connectables = {ModBlocks.LANTERN_COAL,ModBlocks.LANTERN_REDSTONE,ModBlocks.LANTERN_MUSHROOM};
+	private static final Block<?>[] connectables = {ModBlocks.LANTERN_COAL,ModBlocks.LANTERN_REDSTONE,ModBlocks.LANTERN_MUSHROOM};
 
 	@Inject(
 		method = {"canConnect"},

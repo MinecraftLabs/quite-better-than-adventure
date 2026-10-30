@@ -9,8 +9,6 @@ import net.minecraft.core.player.inventory.slot.Slot;
 
 import java.util.Random;
 
-import static quitebetter.core.ModCore.LOGGER;
-
 public class ItemSack extends Item {
 	public ItemSack(String name, String namespaceId, int id) {
 		super(name, namespaceId, id);
@@ -72,7 +70,6 @@ public class ItemSack extends Item {
 	public Integer findItem(ItemStack sack, ItemStack fndstack) {
 		for (int i=getItemCount(sack); i>=0; i--) {
 			ItemStack stack = getItem(sack,i);
-			if (stack!=null) { LOGGER.info(stack.getMetadata()+" "+fndstack.getMetadata()); }
 			if (stack!=null && Item.itemsList[stack.itemID]!=null && Item.getItem(stack.itemID)!=null && Item.getItem(stack.itemID).equals(Item.getItem(fndstack.itemID)) && stack.getMetadata()==fndstack.getMetadata()) {
 				return i;
 			}
@@ -124,7 +121,7 @@ public class ItemSack extends Item {
 
 	@Override
 	public ItemStack onInventoryInteract(Player player, Slot slot, ItemStack stackInSlot, boolean isItemGrabbed) {
-		Random random = new Random();
+		Random random = player.world.rand;
 		ItemStack sack;
 		if (isItemGrabbed) {
 			sack = player.inventory.getHeldItemStack();

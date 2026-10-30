@@ -27,8 +27,8 @@ public class EntityFallingBlockMixin {
 	private void tick(CallbackInfo ci) {
 		EntityFallingBlock ent = (EntityFallingBlock)(Object)this;
 		Block<?> block = ent.carriedBlock.block();
-		if (block.getLogic() instanceof IFalling) {
-			if (!((IFalling) block.getLogic()).FellOnGround(ent, ent.tilePosApprox())) {
+		if (block.getLogic() instanceof IFalling falling) {
+			if (!falling.FellOnGround(ent, ent.tilePosApprox())) {
 				ci.cancel();
 			}
 		}

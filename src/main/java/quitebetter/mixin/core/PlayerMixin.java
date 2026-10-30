@@ -19,13 +19,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class PlayerMixin {
 	@Inject(
 		method = {"getNextArrow"},
-		at = @At("RETURN"),
+		at = @At("HEAD"),
 		cancellable = true
 	)
 	public void getNextArrow(CallbackInfoReturnable<Item> cir) {
 		Player player = (Player)(Object)this;
 		Item nextArrow = null;
-		ItemStack quiverSlot = player.inventory.armorItemInSlot(HumanArmorShape.CHEST);
+		ItemStack quiverSlot = player.getItemInArmorSlot(HumanArmorShape.CHEST);
 		/// PRIORITY: HOTBAR > QUIVER > OUT OF HOTBAR
 		//HOTBAR
 		if (PlayerUtil.hasItemInHotbar(player,Items.AMMO_ARROW_FLAMING)) {

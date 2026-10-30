@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import quitebetter.core.tileentity.TileEntityCrate;
 import quitebetter.core.tileentity.TileEntityGlued;
 
 import java.util.Random;
@@ -33,9 +32,9 @@ public class ItemSlimeballMixin {
 	)
 	public void onUseOnBlock(ItemStack itemstack, World world, @Nullable Player entityplayer, TilePosc blockPos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		TileEntity tile = world.getTileEntity(blockPos);
-		if (tile instanceof TileEntityGlued || tile instanceof TileEntityCrate) {
+		if (tile instanceof TileEntityGlued glued) {
 			if (entityplayer != null && entityplayer.getCurrentEquippedItem()!=null && entityplayer.getCurrentEquippedItem().getItem().equals(Items.SLIMEBALL)) {
-				((TileEntityGlued) tile).applyGlue();
+				glued.applyGlue();
 			}
 		}
 	}
@@ -46,9 +45,9 @@ public class ItemSlimeballMixin {
 	)
 	public void onUseByActivator(ItemStack itemStack, World world, TileEntityActivator activator, Random random, TilePosc blockPos, Direction direction, double offX, double offY, double offZ, CallbackInfo ci) {
 		TileEntity tile = world.getTileEntity(blockPos.add(direction, new TilePos()));
-		if (tile instanceof TileEntityGlued || tile instanceof TileEntityCrate) {
+		if (tile instanceof TileEntityGlued glued) {
 			if (activator.getItem(activator.stackSelector)!=null && activator.getItem(activator.stackSelector).getItem().equals(Items.SLIMEBALL)) {
-				((TileEntityGlued) tile).applyGlue();
+				glued.applyGlue();
 			}
 		}
 	}

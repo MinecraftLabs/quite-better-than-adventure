@@ -14,7 +14,7 @@ public class CrateTooltip extends TileTooltip<TileEntityCrate> {
 
 	@Override
 	public void drawAdvancedTooltip(TileEntityCrate crate, AdvancedInfoComponent c) {
-		if (crate.glued) { c.drawStringWithShadow("Glued", 0, Colors.GREEN); return; }
+		if (crate.isGlued()) { c.drawStringWithShadow("Glued", 0, Colors.GREEN); return; }
 		if (crate.itemID == null) return;
 		int maxitemcount = crate.getOverallMaxSpace();
 		int itemcount = crate.getOverallFullness();

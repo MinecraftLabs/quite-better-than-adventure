@@ -27,22 +27,6 @@ public class BlockLogicHazard extends BlockLogic implements IPaintable {
 		return new ItemStack[]{new ItemStack(this, 1, meta)};
 	}
 
-	public DyeColor fromMetadata(int meta) {
-		return DyeColor.colorFromBlockMeta(meta);
-	}
-
-	public int toMetadata(DyeColor color) {
-		return color.blockMeta;
-	}
-
-	public int stripColorFromMetadata(int meta) {
-		return 0;
-	}
-
-	public void removeDye(World world, TilePosc tilePos) {
-		world.setBlockDataNotify(tilePos, 0);
-	}
-
 	@Override
 	public String getLanguageKey(int meta) {
 		return this.block.getKey();

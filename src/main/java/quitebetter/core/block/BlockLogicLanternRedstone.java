@@ -1,7 +1,6 @@
 package quitebetter.core.block;
 
 import net.minecraft.core.block.Block;
-import net.minecraft.core.block.BlockLogic;
 import net.minecraft.core.block.material.Material;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
@@ -18,10 +17,10 @@ public class BlockLogicLanternRedstone extends BlockLogicLanternCoal {
 
 	@Override
 	public void animationTick(World world, TilePosc tilePos, Random rand) {
-		double xPos = (double)tilePos.x() + (double)0.5F;
+		double xPos = (double)tilePos.x() + 0.5;
 		double yPos = (double)tilePos.y() + 0.5;
-		double zPos = (double)tilePos.z() + (double)0.5F;
-		world.spawnParticle("reddust", xPos, yPos, zPos, (double)0.0F, (double)0.0F, (double)0.0F, 10, false);
+		double zPos = (double)tilePos.z() + 0.5;
+		world.spawnParticle("reddust", xPos, yPos, zPos, 0.0, 0.0, 0.0, 10, false);
 	}
 
 	@Override

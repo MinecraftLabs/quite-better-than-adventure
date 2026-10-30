@@ -1,11 +1,9 @@
 package quitebetter.core.feature;
 
-import net.minecraft.core.block.Blocks;
 import net.minecraft.core.net.command.util.CommandHelper;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.biome.Biome;
 import net.minecraft.core.world.chunk.Chunk;
-import net.minecraft.core.world.generate.feature.WorldFeatureLabyrinth;
 import net.minecraft.core.world.pos.TilePos;
 import quitebetter.core.util.WorldUtil;
 
@@ -13,11 +11,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class ModFeatures {
-	public static boolean TreeGeneration(World world, Random random, int x, int y, int z, Class<?> treeclass) {
-		WorldFeatureGlowingMushrooms.PlaceNearTree(world, random, x, y, z, world.getBlockBiome(new TilePos(x,y,z)));
-		return true;
-	}
-
 	public static void Setup() {
 		CommandHelper.registerWorldFeatureClass(WorldFeatureMaze.class);
 	}

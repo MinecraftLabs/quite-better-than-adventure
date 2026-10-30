@@ -1,24 +1,15 @@
 package quitebetter.core.util;
 
-import net.minecraft.client.entity.player.PlayerLocal;
-import net.minecraft.client.player.controller.PlayerController;
-import net.minecraft.client.player.controller.PlayerControllerMP;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.enums.HumanArmorShape;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
-import net.minecraft.core.net.packet.PacketEntityFling;
-import net.minecraft.core.net.packet.PacketPlayerAction;
-import net.minecraft.core.net.packet.PacketTileEntityData;
 import net.minecraft.core.player.inventory.container.ContainerInventory;
-import net.minecraft.server.entity.player.PlayerServer;
-import turniplabs.halplibe.HalpLibe;
-import static quitebetter.core.ModCore.LOGGER;
 
 public class PlayerUtil {
 	public static boolean hasItemInHotbar(Player player, Item item) {
-		for (int i=0; i<8; i++) {
+		for (int i=0; i<ContainerInventory.HOTBAR_SIZE; i++) {
 			if (player.inventory.getItem(i)!=null && player.inventory.getItem(i).getItem().equals(item)) {
 				return true;
 			}
@@ -27,7 +18,7 @@ public class PlayerUtil {
 	}
 
 	public static boolean hasItemOutOfHotbar(Player player, Item item) {
-		for (int i=8; i<36; i++) {
+		for (int i=ContainerInventory.HOTBAR_SIZE; i<ContainerInventory.MAIN_INVENTORY_SIZE; i++) {
 			if (player.inventory.getItem(i)!=null && player.inventory.getItem(i).getItem().equals(item)) {
 				return true;
 			}
@@ -64,15 +55,6 @@ public class PlayerUtil {
 		}
 	}
 
-	public static ItemStack findStackInInventory(Player player, Item item) {
-		for (int i=0; i<36; i++) {
-			if (player.inventory.getItem(i)!=null && player.inventory.getItem(i).getItem().equals(item)) {
-				return player.inventory.getItem(i);
-			}
-		}
-		return null;
-	}
-
 	public static Integer findSlotInInventory(Player player, Item item, int meta) {
 		ContainerInventory inv = player.inventory;
 		for(int i = 0; i < inv.mainInventory.length; ++i) {
@@ -82,44 +64,5 @@ public class PlayerUtil {
 			}
 		}
 		return null;
-	}
-
-	public static boolean stackToInventory(Player player, int index, ItemStack itemstack) {
-		ContainerInventory inv = player.inventory;
-		ItemStack slot = inv.getItem(index);
-		if (slot==null || (slot.itemID==itemstack.itemID && (!slot.getItem().getHasSubtypes() || slot.getMetadata() == itemstack.getMetadata()) && slot.getData() == itemstack.getData() && ( slot.isStackable() && slot.getMaxStackSize()-itemstack.stackSize-slot.stackSize>=0 )) ) {
-			if (slot!=null) { itemstack.stackSize += slot.stackSize; }
-			inv.setItem(index,itemstack);
-			return true;
-		}
-		return false;
-	}
-
-	public static int storeItemStack(Player player, ItemStack itemstack) {
-		ContainerInventory inv = player.inventory;
-		for(int i = 0; i < inv.mainInventory.length; ++i) {
-			if (stackToInventory(player,i,itemstack)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	public static boolean isArmorItemThis(Player player, HumanArmorShape shape, Item item) {
-		ItemStack stack = player.inventory.armorItemInSlot(shape);
-		return stack!=null && stack.getItem().equals(item);
-	}
-
-	public static void inventorySetSlot(Player player, int index, ItemStack stack) {
-		player.inventory.setItem(index, stack);
-	}
-
-	public static void inventoryInfo(Player player) {
-		ContainerInventory inv = player.inventory;
-		LOGGER.info("inventory contents:");
-		for(int i = 0; i < inv.mainInventory.length; ++i) {
-			LOGGER.info("	slot {} has {};",i,inv.getItem(i));
-		}
-		LOGGER.info("end of the inventory.");
 	}
 }

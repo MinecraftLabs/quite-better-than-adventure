@@ -62,8 +62,7 @@ public class TileEntityBasketMixin implements IBasketContents {
 		World world = tile.worldObj;
 		if (world == null) return;
 		TilePos belowPos = new TilePos(tile.tilePos.x, tile.tilePos.y - 1, tile.tilePos.z);
-		if (world.getTileEntity(belowPos)!=null && world.getTileEntity(belowPos) instanceof TileEntityCrate) {
-			TileEntityCrate crate = (TileEntityCrate) world.getTileEntity(belowPos);
+		if (world.getTileEntity(belowPos) instanceof TileEntityCrate crate) {
 			if (crate.canTakeStack(stack) && crate.pushStack(stack)!=null) {
 				cir.setReturnValue(false);
 			}

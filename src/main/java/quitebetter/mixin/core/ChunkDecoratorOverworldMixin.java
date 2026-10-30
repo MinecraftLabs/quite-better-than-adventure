@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.objectweb.asm.Opcodes;
 import quitebetter.core.feature.ModFeatures;
 
 import java.util.Random;
@@ -24,11 +25,15 @@ public class ChunkDecoratorOverworldMixin {
 
 	@Inject(
 		method = "decorate",
-		at = @At("HEAD"),
-		cancellable = true
+		at = @At(
+			value = "FIELD",
+			target = "Lnet/minecraft/core/block/BlockLogicFallingBlock;fallInstantly:Z",
+			opcode = Opcodes.PUTSTATIC,
+			ordinal = 0,
+			shift = At.Shift.AFTER
+		)
 	)
 	private void decorate(Chunk chunk, CallbackInfo ci) {
-		this.world.scheduledUpdatesAreImmediate = true;
 		int chunkX = chunk.pos.x;
 		int chunkZ = chunk.pos.z;
 		int x = chunkX * 16;

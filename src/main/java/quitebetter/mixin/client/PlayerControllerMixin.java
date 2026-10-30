@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import turniplabs.halplibe.helper.EnvironmentHelper;
 
 @Mixin(
 	value = {PlayerController.class},
@@ -38,11 +37,8 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof ILeftClickable) {
-			ILeftClickable logic = (ILeftClickable) block.getLogic();
-			if (logic.preventsBreaking(world,tilePos,player,side)) {
-				ci.cancel();
-			}
+		if (block.getLogic() instanceof ILeftClickable logic && logic.preventsBreaking(world,tilePos,player,side)) {
+			ci.cancel();
 		}
 	}
 
@@ -61,14 +57,11 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof ILeftClickable) {
-			ILeftClickable logic = (ILeftClickable) block.getLogic();
-			if (logic.preventsBreaking(world,tilePos,player,side)) {
-				if (EnvironmentHelper.isSingleplayerClient()) {
-					logic.onBlockLeftClicked(world,tilePos,player,side);
-				}
-				cir.cancel();
+		if (block.getLogic() instanceof ILeftClickable logic && logic.preventsBreaking(world,tilePos,player,side)) {
+			if (!world.isClientSide) {
+				logic.onBlockLeftClicked(world,tilePos,player,side);
 			}
+			cir.cancel();
 		}
 	}
 
@@ -86,15 +79,12 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof ILeftClickable) {
-			ILeftClickable logic = (ILeftClickable) block.getLogic();
-			if (logic.preventsBreaking(world,tilePos,player,side)) {
-				if (EnvironmentHelper.isSingleplayerClient()) {
-					logic.onBlockLeftClicked(world,tilePos,player,side);
-				}
-				controller.sendStartDigPacket(tilePos, side, xHit, yHit);
-				cir.cancel();
+		if (block.getLogic() instanceof ILeftClickable logic && logic.preventsBreaking(world,tilePos,player,side)) {
+			if (!world.isClientSide) {
+				logic.onBlockLeftClicked(world,tilePos,player,side);
 			}
+			controller.sendStartDigPacket(tilePos, side, xHit, yHit);
+			cir.cancel();
 		}
 	}
 
@@ -106,12 +96,9 @@ public class PlayerControllerMixin {
 	)
 	public void placeItemStackOnTile(Player player, World world, ItemStack itemstack, TilePosc tilePos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof IRightClickable) {
-			IRightClickable logic = (IRightClickable) block.getLogic();
-			if (logic.preventsInteraction(world,tilePos,player,side)) {
-				logic.onBlockRightClicked(world,tilePos,player,side);
-				cir.cancel();
-			}
+		if (block.getLogic() instanceof IRightClickable logic && logic.preventsInteraction(world,tilePos,player,side)) {
+			logic.onBlockRightClicked(world,tilePos,player,side);
+			cir.cancel();
 		}
 	}
 	@Inject(
@@ -121,12 +108,9 @@ public class PlayerControllerMixin {
 	)
 	public void useOrPlaceItemStackOnTile(Player player, World world, ItemStack itemstack, TilePosc tilePos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		Block<?> block = world.getBlockType(tilePos);
-		if (block.getLogic() instanceof IRightClickable) {
-			IRightClickable logic = (IRightClickable) block.getLogic();
-			if (logic.preventsInteraction(world,tilePos,player,side)) {
-				logic.onBlockRightClicked(world,tilePos,player,side);
-				cir.cancel();
-			}
+		if (block.getLogic() instanceof IRightClickable logic && logic.preventsInteraction(world,tilePos,player,side)) {
+			logic.onBlockRightClicked(world,tilePos,player,side);
+			cir.cancel();
 		}
 	}
 }

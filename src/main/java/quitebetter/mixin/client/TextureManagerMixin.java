@@ -19,7 +19,7 @@ import static quitebetter.core.ModCore.MOD_ID;
 	value = {TextureManager.class},
 	remap = false
 )
-public abstract class TextureMagangerMixin {
+public abstract class TextureManagerMixin {
 
 	@Shadow
 	protected abstract void addDynamicTexture(DynamicTexture texture);
@@ -34,7 +34,7 @@ public abstract class TextureMagangerMixin {
 			String[] activesides = new String[]{"top", "side", "side_inverted"};
 			for(String side : activesides) {
 				IconCoordinate texture = TextureRegistry.getTexture(MOD_ID + ":block/fan/active_" + side);
-				this.addDynamicTexture(new DynamicTextureCustom(texture, (AnimationProperties) texture.getMeta("animation", AnimationProperties.class)));
+				this.addDynamicTexture(new DynamicTextureCustom(texture, texture.getMeta("animation", AnimationProperties.class)));
 			}
 		}
 	}

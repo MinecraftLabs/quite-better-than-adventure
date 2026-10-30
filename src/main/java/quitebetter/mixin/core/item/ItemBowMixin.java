@@ -18,8 +18,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Random;
-
 @Mixin(
 	value = {ItemBow.class},
 	remap = false
@@ -31,12 +29,11 @@ public class ItemBowMixin {
 		cancellable = true
 	)
 	public void onUse(ItemStack itemstack, World world, Player entityplayer, CallbackInfoReturnable<ItemStack> cir) {
-		Random rand = new Random();
 		Item item = entityplayer.getNextArrow();
 		if (item!=null) {
 			PlayerUtil.consumeBowAmmo(entityplayer);
 			itemstack.damageItem(1, entityplayer);
-			world.playSoundAtEntity(entityplayer, entityplayer, "random.bow", 0.3F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
+			world.playSoundAtEntity(entityplayer, entityplayer, "random.bow", 0.3F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
 			//ARROW CASES
 			if (!world.isClientSide) {
 				if (item.equals(Items.AMMO_ARROW)) {
@@ -53,6 +50,5 @@ public class ItemBowMixin {
 			}
 		}
 		cir.setReturnValue(itemstack);
-		cir.cancel();
 	}
 }

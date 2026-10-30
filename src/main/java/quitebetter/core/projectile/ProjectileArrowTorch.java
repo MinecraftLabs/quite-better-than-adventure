@@ -9,7 +9,6 @@ import net.minecraft.core.entity.EntityPrimedTNT;
 import net.minecraft.core.entity.Mob;
 import net.minecraft.core.entity.projectile.ProjectileArrow;
 import net.minecraft.core.item.ItemStack;
-import net.minecraft.core.item.Items;
 import net.minecraft.core.util.phys.HitResult;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.pos.TilePos;
@@ -20,26 +19,10 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 
 	public ProjectileArrowTorch(World world, Mob entityliving, boolean doesArrowBelongToPlayer) {
 		super(world, entityliving, doesArrowBelongToPlayer, 0);
-		this.mobsHit = 0;
-		this.shake = 0;
-		this.inData = 0;
-		this.stack = new ItemStack(Items.AMMO_ARROW);
-		this.inGround = false;
-		this.doesArrowBelongToPlayer = false;
-		this.setDoesArrowBelongToPlayer(doesArrowBelongToPlayer);
-		this.arrowType = 0;
 	}
 
 	public ProjectileArrowTorch(World world, double x, double y, double z) {
 		super(world, x, y, z, 0);
-		this.mobsHit = 0;
-		this.shake = 0;
-		this.inData = 0;
-		this.stack = new ItemStack(Items.AMMO_ARROW);
-		this.inGround = false;
-		this.doesArrowBelongToPlayer = false;
-		this.setDoesArrowBelongToPlayer(doesArrowBelongToPlayer);
-		this.arrowType = 0;
 	}
 
 	@Override
@@ -55,7 +38,7 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 		super.onHit(hitResult);
 		if (hitResult instanceof HitResult.Entity hitEntity) {
 			hitEntity.entity.remainingFireTicks = 25;
-			world.playSoundAtEntity((Entity)null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
+			world.playSoundAtEntity(null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 			if (hitEntity.entity instanceof EntityPrimedTNT tnt) {
 				tnt.fuse = 0;
 			}
@@ -95,7 +78,7 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 		if ((world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
 			if (ModBlocks.ARROW_TORCH.canPlaceAt(world,pos)) {
 				world.setBlockTypeNotify(pos, ModBlocks.ARROW_TORCH);
-				world.playSoundAtEntity((Entity)null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
+				world.playSoundAtEntity(null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 				for (int i=1; i < 5; i++) {
 					world.spawnParticle("smoke", x+0.5, y+0.5, z+0.5, random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), 0, false);
 				}
@@ -114,7 +97,7 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 						if ((world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
 							if (ModBlocks.ARROW_TORCH.canPlaceAt(world, pos)) {
 								world.setBlockTypeNotify(pos, ModBlocks.ARROW_TORCH);
-								world.playSoundAtEntity((Entity) null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
+								world.playSoundAtEntity(null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 								for (int i = 1; i < 5; i++) {
 									world.spawnParticle("smoke", x + 0.5, y + 0.5, z + 0.5, random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), 0, false);
 								}

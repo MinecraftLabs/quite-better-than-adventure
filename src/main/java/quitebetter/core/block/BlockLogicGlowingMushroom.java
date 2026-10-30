@@ -1,7 +1,6 @@
 package quitebetter.core.block;
 
 import net.minecraft.core.block.Block;
-import net.minecraft.core.block.BlockLogicFlower;
 import net.minecraft.core.block.BlockLogicMushroom;
 import net.minecraft.core.block.Blocks;
 import net.minecraft.core.entity.player.Player;
@@ -18,7 +17,7 @@ public class BlockLogicGlowingMushroom extends BlockLogicMushroom {
 	public BlockLogicGlowingMushroom(Block<?> block) {
 		super(block);
 		float f = 0.2F;
-		this.setBlockBounds((double)(0.5F - f), (double)0.0F, (double)(0.5F - f), (double)(0.5F + f), (double)(f * 2.0F), (double)(0.5F + f));
+		this.setBlockBounds((double)(0.5F - f), 0.0, (double)(0.5F - f), (double)(0.5F + f), (double)(f * 2.0F), (double)(0.5F + f));
 		this.canBeBonemealed = true;
 		block.setTicking(true);
 	}

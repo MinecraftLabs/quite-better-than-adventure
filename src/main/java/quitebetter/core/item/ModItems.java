@@ -91,19 +91,20 @@ public class ModItems {
 			);
 
 		//STEEL FISHING ROD
-		TOOL_STEEL_FISHINGROD = new ItemBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(stardewLoaded ? null : misc())
+		ItemBuilder steelFishingRodBuilder = new ItemBuilder(MOD_ID)
+			.setCreativeInventoryPlacement(misc())
 			.setStackSize(1)
-			.build(
-				new ItemFishingRod(
-					name("tool_steel_fishingrod"),
-					key("tool_steel_fishingrod"),
-					id("TOOL_STEEL_FISHINGROD")
-				)
-			);
+			.setMaxDamage(588);
 		if (stardewLoaded) {
-			TOOL_STEEL_FISHINGROD = TOOL_STEEL_FISHINGROD.withTags(ItemTags.NOT_IN_CREATIVE_MENU);
+			steelFishingRodBuilder = steelFishingRodBuilder.setTags(ItemTags.NOT_IN_CREATIVE_MENU);
 		}
+		TOOL_STEEL_FISHINGROD = steelFishingRodBuilder.build(
+			new ItemFishingRod(
+				name("tool_steel_fishingrod"),
+				key("tool_steel_fishingrod"),
+				id("TOOL_STEEL_FISHINGROD")
+			)
+		);
 
 		//PEDESTAL
 		PEDESTAL = new ItemBuilder(MOD_ID)

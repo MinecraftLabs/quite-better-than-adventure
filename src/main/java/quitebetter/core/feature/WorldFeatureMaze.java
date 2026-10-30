@@ -22,16 +22,14 @@ import quitebetter.core.block.ModBlocks;
 import quitebetter.core.item.ModItems;
 import quitebetter.core.util.WorldUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 public class WorldFeatureMaze implements WorldFeatureInterface {
-	private int wallBlockA;
-	private int wallBlockB;
-	private int floorBlock;
-	private int slabBlock;
+	private Block<?> wallBlockA;
+	private Block<?> wallBlockB;
+	private Block<?> floorBlock;
+	private Block<?> slabBlock;
 	private int mazeDepth = 24;
 	private int entranceHeight = 3;
 	private int roomSize = 2;
@@ -47,8 +45,8 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 		Biomes.OVERWORLD_OUTBACK
 	};
 
-	private void setBlock(World world, int x, int y, int z, int id) {
-		world.setBlockType(new TilePos(x, y, z), Blocks.getBlock(id));
+	private void setBlock(World world, int x, int y, int z, Block<?> block) {
+		world.setBlockType(new TilePos(x, y, z), block);
 	}
 
 	@Override
@@ -56,59 +54,59 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 		int x = tilePos.x();
 		int y = tilePos.y();
 		int z = tilePos.z();
-		this.wallBlockA = ModBlocks.BRICK_MUD_BAKED.id();
-		this.wallBlockB = Blocks.MUD_BAKED.id();
-		this.floorBlock = Blocks.COBBLE_STONE_MOSSY.id();
-		this.slabBlock = ModBlocks.SLAB_BRICK_MUD_BAKED.id();
+		this.wallBlockA = ModBlocks.BRICK_MUD_BAKED;
+		this.wallBlockB = Blocks.MUD_BAKED;
+		this.floorBlock = Blocks.COBBLE_STONE_MOSSY;
+		this.slabBlock = ModBlocks.SLAB_BRICK_MUD_BAKED;
 
 		Block<?> block = world.getBlockType(new TilePos(x,y-1,z));
 		if (!block.hasTag(BlockTags.IS_WATER)) {
 			//CHEST LOOT
-			this.chestLoot = new WeightedRandomBag();
-			this.chestLoot.addEntry(new WeightedRandomLootObject((ItemStack)null), (double)892.0F);
+			this.chestLoot = new WeightedRandomBag<>();
+			this.chestLoot.addEntry(new WeightedRandomLootObject(null), 892.0);
 			//BLOCKS
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.DIRT_SCORCHED.getDefaultStack(), 1, 3), (double)50.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.MUD.getDefaultStack(), 1, 3), (double)50.0F);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.DIRT_SCORCHED.getDefaultStack(), 1, 3), 50.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.MUD.getDefaultStack(), 1, 3), 50.0);
 			//ARMOR
-			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_HELMET_GOLD.getDefaultStack()), (double)15.0F);
-			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_CHESTPLATE_GOLD.getDefaultStack()), (double)15.0F);
-			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_LEGGINGS_GOLD.getDefaultStack()), (double)15.0F);
-			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_BOOTS_GOLD.getDefaultStack()), (double)15.0F);
+			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_HELMET_GOLD.getDefaultStack()), 15.0);
+			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_CHESTPLATE_GOLD.getDefaultStack()), 15.0);
+			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_LEGGINGS_GOLD.getDefaultStack()), 15.0);
+			//this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ARMOR_BOOTS_GOLD.getDefaultStack()), 15.0);
 			//TOOLS
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_SWORD_GOLD.getDefaultStack()), (double)15.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_PICKAXE_GOLD.getDefaultStack()), (double)15.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_AXE_GOLD.getDefaultStack()), (double)15.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_SHOVEL_GOLD.getDefaultStack()), (double)15.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_HOE_GOLD.getDefaultStack()), (double)15.0F);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_SWORD_GOLD.getDefaultStack()), 15.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_PICKAXE_GOLD.getDefaultStack()), 15.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_AXE_GOLD.getDefaultStack()), 15.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_SHOVEL_GOLD.getDefaultStack()), 15.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.TOOL_HOE_GOLD.getDefaultStack()), 15.0);
 			//VALUABLES
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.INGOT_GOLD.getDefaultStack(), 1, 5), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ORE_RAW_GOLD.getDefaultStack(), 1, 5), (double)200.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.INGOT_IRON.getDefaultStack(), 1, 5), (double)200.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ORE_RAW_IRON.getDefaultStack(), 1, 5), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.DIAMOND.getDefaultStack(), 1, 3), (double)5.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.DUST_REDSTONE.getDefaultStack(), 3, 6), (double)100.0F);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.INGOT_GOLD.getDefaultStack(), 1, 5), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ORE_RAW_GOLD.getDefaultStack(), 1, 5), 200.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.INGOT_IRON.getDefaultStack(), 1, 5), 200.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.ORE_RAW_IRON.getDefaultStack(), 1, 5), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.DIAMOND.getDefaultStack(), 1, 3), 5.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.DUST_REDSTONE.getDefaultStack(), 3, 6), 100.0);
 
 			//MISC
 			for(int i = 0; i < 9; ++i) {
-				this.chestLoot.addEntry(new WeightedRandomLootObject(new ItemStack(Item.itemsList[Items.RECORD_13.id + i])), (double)1.0F);
+				this.chestLoot.addEntry(new WeightedRandomLootObject(new ItemStack(Item.itemsList[Items.RECORD_13.id + i])), 1.0);
 			}
 
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.SPONGE_DRY.getDefaultStack(), 1, 4), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.STRING.getDefaultStack(), 1, 6), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.SEEDS_PUMPKIN.getDefaultStack(), 1, 3), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.LABEL.getDefaultStack()), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FEATHER_CHICKEN.getDefaultStack(), 2, 5), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(new ItemStack(Items.DYE,1,0), 2, 5), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(ModItems.SEASHELL.getDefaultStack(), 2, 8), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FOOD_BREAD.getDefaultStack(), 1, 3), (double)100.0F);
-			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FOOD_STEW_MUSHROOM.getDefaultStack()), (double)100.0F);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Blocks.SPONGE_DRY.getDefaultStack(), 1, 4), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.STRING.getDefaultStack(), 1, 6), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.SEEDS_PUMPKIN.getDefaultStack(), 1, 3), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.LABEL.getDefaultStack()), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FEATHER_CHICKEN.getDefaultStack(), 2, 5), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(new ItemStack(Items.DYE,1,0), 2, 5), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(ModItems.SEASHELL.getDefaultStack(), 2, 8), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FOOD_BREAD.getDefaultStack(), 1, 3), 100.0);
+			this.chestLoot.addEntry(new WeightedRandomLootObject(Items.FOOD_STEW_MUSHROOM.getDefaultStack()), 100.0);
 
 			generateEntrance(world, random, x, y, z);
 		}
 		return true;
 	}
 
-	public int getWallBlock(Random random) {
+	public Block<?> getWallBlock(Random random) {
 		return random.nextInt(5)==0 ? this.wallBlockB : this.wallBlockA;
 	}
 
@@ -127,7 +125,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 						if (yWallCheck) {
 							setBlock(world, x, y, z, this.floorBlock);
 						} else {
-							setBlock(world, x, y, z, 0);
+							setBlock(world, x, y, z, Blocks.AIR);
 						}
 					}
 				}
@@ -144,7 +142,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 						if (yWallCheck) {
 							setBlock(world, x, y, z, this.floorBlock);
 						} else {
-							setBlock(world, x, y, z, 0);
+							setBlock(world, x, y, z, Blocks.AIR);
 						}
 					} else {
 						setBlock(world, x, y, z, this.getWallBlock(random));
@@ -225,7 +223,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 									if (yWallCheck) {
 										setBlock(world, x, y, z, this.floorBlock);
 									} else {
-										setBlock(world, x, y, z, 0);
+										setBlock(world, x, y, z, Blocks.AIR);
 									}
 								} else {
 									setBlock(world, x, y, z, this.getWallBlock(random));
@@ -233,7 +231,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 							}
 						}
 					}
-					this.generateFloor(world, random, blockX, blockY-depth+1, blockZ, size, Blocks.SPIKES.id());
+					this.generateFloor(world, random, blockX, blockY-depth+1, blockZ, size, Blocks.SPIKES);
 					if (random.nextInt(3)==0) {
 						for (int y=blockY - depth; y <= blockY-1; ++y) {
 							setBlock(world, blockX, y, blockZ, this.getWallBlock(random));
@@ -242,20 +240,20 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 				break;
 		}
 		this.generateFloor(world, random, blockX, blockY+height-1, blockZ, size, this.floorBlock);
-		this.generateDecor(world, random, blockX, blockY+height-2, blockZ, size, Blocks.COBWEB.id(), 5);
+		this.generateDecor(world, random, blockX, blockY+height-2, blockZ, size, Blocks.COBWEB, 5);
 	}
 
 	private void clearRoom(World world, int blockX, int blockY, int blockZ, int size, int height) {
 		for (int y=0; y<=height; y++) {
 			for (int x = -size+1; x<=size-1; x++) {
 				for (int z = -size+1; z<=size-1; z++) {
-					setBlock(world, blockX+x, blockY+y, blockZ+z, 0);
+					setBlock(world, blockX+x, blockY+y, blockZ+z, Blocks.AIR);
 				}
 			}
 		}
 	}
 
-	private void generateFloor(World world, Random random, int blockX, int blockY, int blockZ, int size, int bid) {
+	private void generateFloor(World world, Random random, int blockX, int blockY, int blockZ, int size, Block<?> bid) {
 		for (int x = -size+1; x<=size-1; x++) {
 			for (int z = -size+1; z<=size-1; z++) {
 				setBlock(world, blockX+x, blockY, blockZ+z, bid);
@@ -287,7 +285,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 			case 1:
 				//SHELF
 				for (int x=-1;x<=1;x++) {
-					world.setBlockTypeDataNotify(new TilePos(blockX+x, blockY+height-3, blockZ), Blocks.getBlock(this.slabBlock), 2);
+					world.setBlockTypeDataNotify(new TilePos(blockX+x, blockY+height-3, blockZ), this.slabBlock, 2);
 				}
 				if (random.nextInt(2)==0) {
 					this.generateChest(world, random, blockX, blockY+height-2, blockZ, this.getCloseDoorsAmount(doors));
@@ -296,7 +294,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 		}
 	}
 
-	private void generateDecor(World world, Random random, int blockX, int blockY, int blockZ, int size, int bid, int chance) {
+	private void generateDecor(World world, Random random, int blockX, int blockY, int blockZ, int size, Block<?> bid, int chance) {
 		for (int x = -size+1; x<=size-1; x++) {
 			for (int z = -size+1; z<=size-1; z++) {
 				if (world.canPlaceInsideBlock(new TilePos(blockX+x, blockY, blockZ+z)) && random.nextInt(chance)==0) {
@@ -330,7 +328,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 	private HashMap<Direction,Boolean> getDoors(World world, int blockX, int blockY, int blockZ, int size) {
 		HashMap<Direction,Boolean> out = new HashMap<>();
 		for (Direction dir : Direction.horizontal) {
-			int bid = world.getBlockType(new TilePos(blockX+dir.offsetX()*size,blockY+1,blockZ+dir.offsetZ()*size)).id();
+			Block<?> bid = world.getBlockType(new TilePos(blockX+dir.offsetX()*size,blockY+1,blockZ+dir.offsetZ()*size));
 			out.put(dir,!(bid==this.wallBlockA || bid==this.wallBlockB));
 		}
 		return out;
@@ -353,7 +351,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 	}
 
 	private void setRoomDoors(World world, Random random, int blockX, int blockY, int blockZ, int size, Direction dir, int id) {
-		int bid = 0;
+		Block<?> bid = Blocks.AIR;
 		switch (id) {
 			case 0: //OPEN
 			case 1:
@@ -363,8 +361,8 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 				bid = this.getWallBlock(random);
 				break;
 		}
-		if (bid==0 && random.nextInt(2)==0) {
-			bid = ModBlocks.BLOCK_BONE.id();
+		if (bid==Blocks.AIR && random.nextInt(2)==0) {
+			bid = ModBlocks.BLOCK_BONE;
 		}
 		setBlock(world, blockX+dir.offsetX()*size, blockY, blockZ+dir.offsetZ()*size, bid);
 		setBlock(world, blockX+dir.offsetX()*size, blockY+1, blockZ+dir.offsetZ()*size, bid);
@@ -373,7 +371,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 	//CHESTS
 
 	private void generateChest(World world, Random random, int blockX, int blockY, int blockZ, int tier) {
-		setBlock(world, blockX, blockY, blockZ, Blocks.CHEST_PLANKS_OAK.id());
+		setBlock(world, blockX, blockY, blockZ, Blocks.CHEST_PLANKS_OAK);
 		BlockLogicChest.setDefaultDirection(world, new TilePos(blockX, blockY, blockZ));
 		TileEntityChest tileentitychest = (TileEntityChest)world.getTileEntity(new TilePos(blockX, blockY, blockZ));
 		if (tileentitychest==null) {
@@ -382,7 +380,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 
 		int amount = 12+tier*4;
 		for(int i = 0; i < amount; ++i) {
-			ItemStack itemstack = ((WeightedRandomLootObject)this.chestLoot.getRandom(random)).getItemStack(random);
+			ItemStack itemstack = this.chestLoot.getRandom(random).getItemStack(random);
 			if (itemstack != null && tileentitychest != null) {
 				tileentitychest.setItem(random.nextInt(tileentitychest.getContainerSize()), itemstack);
 			}

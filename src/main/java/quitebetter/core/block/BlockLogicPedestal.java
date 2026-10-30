@@ -30,14 +30,14 @@ public class BlockLogicPedestal extends BlockLogic {
 		ItemStack heldItem = player.getHeldItem();
 		boolean flag = tile.setDisplayItem(player, heldItem);
 		if (heldItem != null && heldItem.stackSize <= 0) {
-			player.inventory.setItem(player.inventory.getCurrentSlot(), (ItemStack)null);
+			player.inventory.setItem(player.inventory.getCurrentSlot(), null);
 		}
 
 		return flag;
 	}
 
-	public boolean mayPlaceOn(int blockId) {
-		Block[] excepts = {
+	public boolean mayPlaceOn(Block<?> block) {
+		Block<?>[] excepts = {
 			ModBlocks.SUPPORT_IRON,
 			ModBlocks.SUPPORT_STEEL,
 			ModBlocks.SUPPORT_WOOD,
@@ -54,13 +54,13 @@ public class BlockLogicPedestal extends BlockLogic {
 			Blocks.ICE,
 			Blocks.PERMAICE
 		};
-		return Blocks.solid[blockId] || Arrays.asList(excepts).contains(Blocks.getBlock(blockId));
+		return block.solid() || Arrays.asList(excepts).contains(block);
 	}
 
 	@Override
 	public boolean canStay(World world, TilePosc tilePos) {
 		if (tilePos.y() >= 0 && tilePos.y() < world.getHeightBlocks()) {
-			return this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())).id());
+			return this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())));
 		} else {
 			return false;
 		}
@@ -68,14 +68,14 @@ public class BlockLogicPedestal extends BlockLogic {
 
 	@Override
 	public boolean canPlaceAt(World world, TilePosc tilePos) {
-		return super.canPlaceAt(world, tilePos) && this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())).id());
+		return super.canPlaceAt(world, tilePos) && this.mayPlaceOn(world.getBlockType(tilePos.down(new TilePos())));
 	}
 
 	@Override
 	public void onNeighborChanged(World world, TilePosc tilePos, Block<?> block) {
 		super.onNeighborChanged(world, tilePos, block);
 		if (!this.canStay(world, tilePos)) {
-			this.dropWithCause(world, EnumDropCause.WORLD, tilePos, world.getBlockData(tilePos), (TileEntity)null, (Player)null);
+			this.dropWithCause(world, EnumDropCause.WORLD, tilePos, world.getBlockData(tilePos), null, null);
 			world.setBlockTypeNotify(tilePos, Blocks.AIR);
 		}
 	}
@@ -100,7 +100,7 @@ public class BlockLogicPedestal extends BlockLogic {
 		return new ItemStack[]{new ItemStack(ModItems.PEDESTAL)};
 	}
 
-	public static void updateNeighbours(World world, TilePosc tilePos, Block block) {
+	public static void updateNeighbours(World world, TilePosc tilePos, Block<?> block) {
 		int x = tilePos.x();
 		int y = tilePos.y();
 		int z = tilePos.z();

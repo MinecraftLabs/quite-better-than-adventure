@@ -11,19 +11,18 @@ import net.minecraft.core.item.Item;
 import quitebetter.core.block.ModBlocks;
 import quitebetter.core.item.ModItems;
 import net.minecraft.core.block.Blocks;
-import net.minecraft.core.data.registry.Registries;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.item.Items;
 import net.minecraft.core.util.helper.DyeColor;
 import turniplabs.halplibe.helper.RecipeBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static quitebetter.core.ModCore.MOD_ID;
 
 public class ModRecipes {
-	public static  final RecipeGroup<RecipeEntryCrafting<?, ?>> GROUP_WORKBENCH = ((RecipeGroup<RecipeEntryCrafting<?, ?>>) RecipeBuilder.getRecipeGroup(MOD_ID, "workbench", new RecipeSymbol(Blocks.WORKBENCH.getDefaultStack())));
+	@SuppressWarnings("unchecked")
+	public static final RecipeGroup<RecipeEntryCrafting<?, ?>> GROUP_WORKBENCH = ((RecipeGroup<RecipeEntryCrafting<?, ?>>) RecipeBuilder.getRecipeGroup(MOD_ID, "workbench", new RecipeSymbol(Blocks.WORKBENCH.getDefaultStack())));
 
 	public static void SetupNamespace() {
 		RecipeBuilder.initNameSpace(MOD_ID);
@@ -31,28 +30,24 @@ public class ModRecipes {
 
 	public static void SetupCrafts() {
 		//////GROUPS
-		List<ItemStack> list;
 		//HAZARDS
-		list = new ArrayList();
+		List<ItemStack> list = RecipeBuilder.getItemGroup(MOD_ID, "hazards");
 		list.add(ModBlocks.HAZARD.getDefaultStack());
 		for (DyeColor color : DyeColor.values()) {
 			list.add(new ItemStack(ModBlocks.HAZARD_PAINTED, 1, color.blockMeta));
 		}
-		Registries.ITEM_GROUPS.register(MOD_ID + ":hazards", list);
 		//CRATES
-		list = new ArrayList();
+		list = RecipeBuilder.getItemGroup(MOD_ID, "crates");
 		list.add(ModBlocks.CRATE.getDefaultStack());
 		for (DyeColor color : DyeColor.values()) {
 			list.add(new ItemStack(ModBlocks.CRATE_PAINTED, 1, color.blockMeta));
 		}
-		Registries.ITEM_GROUPS.register(MOD_ID + ":crates", list);
 		//CORRUGATED IRON BLOCKS
-		list = new ArrayList();
+		list = RecipeBuilder.getItemGroup(MOD_ID, "corrugated_irons");
 		list.add(ModBlocks.BLOCK_IRON_CORRUGATED.getDefaultStack());
 		for (DyeColor color : DyeColor.values()) {
 			list.add(new ItemStack(ModBlocks.BLOCK_IRON_CORRUGATED_PAINTED, 1, color.blockMeta << 4));
 		}
-		Registries.ITEM_GROUPS.register(MOD_ID + ":corrugated_irons", list);
 		//////WORKBENCH
 		//HOOK
 		RecipeBuilder.Shaped(MOD_ID,
