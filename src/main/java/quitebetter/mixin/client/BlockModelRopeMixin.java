@@ -31,7 +31,7 @@ public class BlockModelRopeMixin {
 	public void canConnect(WorldSource worldSource, TilePosc tilePos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (direction == Direction.DOWN) {
 			Block<?> block = worldSource.getBlockType(tilePos.add(direction, new TilePos()));
-			if (block!=null && Arrays.asList(connectables).contains(block)) {
+			if (Arrays.asList(connectables).contains(block)) {
 				cir.setReturnValue(true);
 			}
 		}

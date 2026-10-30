@@ -39,10 +39,9 @@ public class BlockLogicGlowingMushroom extends BlockLogicMushroom {
 			}
 		}
 		TilePos belowPos = tilePos.down(new TilePos());
-		if (world.getBlockType(belowPos)!=null && world.getBlockType(belowPos).equals(Blocks.COBBLE_STONE_MOSSY)) {
+		if (world.getBlockType(belowPos).equals(Blocks.COBBLE_STONE_MOSSY)) {
 			if (rand.nextInt(2)==0) {
-				BlockLogicMushroom that = (BlockLogicMushroom)(Object)this;
-				that.updateTick(world, tilePos, rand, false);
+				super.updateTick(world, tilePos, rand, isRandomTick);
 			}
 		}
 	}

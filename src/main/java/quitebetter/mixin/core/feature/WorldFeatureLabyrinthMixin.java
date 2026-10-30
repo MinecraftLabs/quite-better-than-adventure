@@ -122,7 +122,8 @@ public class WorldFeatureLabyrinthMixin {
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/core/WeightedRandomBag;addEntry(Ljava/lang/Object;D)V",
-			shift = At.Shift.AFTER
+			shift = At.Shift.AFTER,
+			ordinal = 0
 		)
 	)
 	private void place(World world, Random random, int x, int y, int z, CallbackInfoReturnable<Boolean> cir) {

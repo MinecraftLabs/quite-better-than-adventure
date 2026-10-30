@@ -24,7 +24,7 @@ public class ItemHook extends Item {
 		Block<?> block = world.getBlockType(blockPos);
 		//check if block can be climbed
 		double distance = player.distanceTo(blockPos.x()+0.5, blockPos.y()+0.5, blockPos.z()+0.5);
-		if (block != null && block.isCubeShaped() && side != Side.BOTTOM && side != Side.TOP &&
+		if (block.isCubeShaped() && side != Side.BOTTOM && side != Side.TOP &&
 			blockPos.y() < player.y && player.yd < 0.1
 			&& distance <= 1.8
 		) {

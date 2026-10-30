@@ -58,12 +58,10 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 
 	public static void toggleInverted(World world, TilePosc tilePos) {
 		Block<?> fan = world.getBlockType(tilePos);
-		if (fan != null) {
-			BlockLogicFan logic = (BlockLogicFan) fan.getLogic();
-			world.setBlockTypeDataNotify(tilePos,
-				(!isInverted(fan) ? (logic.isActive ? ModBlocks.ACTIVE_IN_FAN : ModBlocks.IN_FAN) : (logic.isActive ? ModBlocks.ACTIVE_FAN : ModBlocks.FAN)),
-				world.getBlockData(tilePos));
-		}
+		BlockLogicFan logic = (BlockLogicFan) fan.getLogic();
+		world.setBlockTypeDataNotify(tilePos,
+			(!isInverted(fan) ? (logic.isActive ? ModBlocks.ACTIVE_IN_FAN : ModBlocks.IN_FAN) : (logic.isActive ? ModBlocks.ACTIVE_FAN : ModBlocks.FAN)),
+			world.getBlockData(tilePos));
 	}
 
 	public static boolean isFan(Block block) {
@@ -207,7 +205,7 @@ public class BlockLogicFan extends BlockLogicVeryRotatable {
 
 	public boolean isModifierFire(World world, TilePosc tilePos) {
 		Block block = getModifierBlock(world, tilePos);
-		return this.getModifierBlock(world, tilePos) != null && (this.getModifierBlock(world, tilePos).equals(Blocks.FIRE) || this.getModifierBlock(world, tilePos).equals(Blocks.BRAZIER_ACTIVE));
+		return block.equals(Blocks.FIRE) || block.equals(Blocks.BRAZIER_ACTIVE);
 	}
 
 }

@@ -263,7 +263,7 @@ public class FishingBobberMixin {
 						algaeRate = 100;
 					}
 
-					if (bob.owner.getCurrentEquippedItem() != null && bob.owner.getCurrentEquippedItem().equals(ModItems.TOOL_STEEL_FISHINGROD)) {
+					if (bob.owner.getCurrentEquippedItem() != null && bob.owner.getCurrentEquippedItem().getItem() == ModItems.TOOL_STEEL_FISHINGROD) {
 						steelRate = 100;
 					}
 

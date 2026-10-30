@@ -40,6 +40,7 @@ public class ModItems {
 	}
 
 	public static void Setup() {
+		boolean stardewLoaded = FabricLoader.getInstance().isModLoaded("stardew");
 		//CLIMBING HOOK
 
 		CLIMBING_HOOK = new ItemBuilder(MOD_ID)
@@ -91,7 +92,7 @@ public class ModItems {
 
 		//STEEL FISHING ROD
 		TOOL_STEEL_FISHINGROD = new ItemBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(FabricLoader.getInstance().isModLoaded("stardew") ? null : misc())
+			.setCreativeInventoryPlacement(stardewLoaded ? null : misc())
 			.setStackSize(1)
 			.build(
 				new ItemFishingRod(
@@ -100,7 +101,7 @@ public class ModItems {
 					id("TOOL_STEEL_FISHINGROD")
 				)
 			);
-		if (FabricLoader.getInstance().isModLoaded("stardew")) {
+		if (stardewLoaded) {
 			TOOL_STEEL_FISHINGROD = TOOL_STEEL_FISHINGROD.withTags(ItemTags.NOT_IN_CREATIVE_MENU);
 		}
 

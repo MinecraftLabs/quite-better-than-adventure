@@ -3,13 +3,13 @@ package quitebetter.client;
 import quitebetter.client.blockmodel.BlockModels;
 import quitebetter.client.itemmodel.ItemModels;
 import quitebetter.client.tileentityrender.TileEntityRendererPedestal;
+import quitebetter.core.ModCore;
 import quitebetter.core.tileentity.TileEntityPedestal;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import turniplabs.halplibe.event.defs.ClientEvents;
 import turniplabs.halplibe.util.dependency.Key;
-import quitebetter.core.ModCore;
 
 @Environment(EnvType.CLIENT)
 public class ModClient implements ClientModInitializer {

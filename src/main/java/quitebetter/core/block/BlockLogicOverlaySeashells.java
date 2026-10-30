@@ -28,7 +28,7 @@ public class BlockLogicOverlaySeashells extends BlockLogic {
 	@Override
 	public boolean canPlaceAt(World world, TilePosc tilePos) {
 		Block<?> block = world.getBlockType(tilePos.down(new TilePos()));
-		return block != null && block.getMaterial().isSolid();
+		return block.getMaterial().isSolid();
 	}
 
 	@Override

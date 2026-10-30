@@ -38,7 +38,7 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof ILeftClickable)) {
+		if (block.getLogic() instanceof ILeftClickable) {
 			ILeftClickable logic = (ILeftClickable) block.getLogic();
 			if (logic.preventsBreaking(world,tilePos,player,side)) {
 				ci.cancel();
@@ -61,7 +61,7 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof ILeftClickable)) {
+		if (block.getLogic() instanceof ILeftClickable) {
 			ILeftClickable logic = (ILeftClickable) block.getLogic();
 			if (logic.preventsBreaking(world,tilePos,player,side)) {
 				if (EnvironmentHelper.isSingleplayerClient()) {
@@ -86,7 +86,7 @@ public class PlayerControllerMixin {
 		World world = mc.currentWorld;
 		Player player = mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof ILeftClickable)) {
+		if (block.getLogic() instanceof ILeftClickable) {
 			ILeftClickable logic = (ILeftClickable) block.getLogic();
 			if (logic.preventsBreaking(world,tilePos,player,side)) {
 				if (EnvironmentHelper.isSingleplayerClient()) {
@@ -106,7 +106,7 @@ public class PlayerControllerMixin {
 	)
 	public void placeItemStackOnTile(Player player, World world, ItemStack itemstack, TilePosc tilePos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof IRightClickable)) {
+		if (block.getLogic() instanceof IRightClickable) {
 			IRightClickable logic = (IRightClickable) block.getLogic();
 			if (logic.preventsInteraction(world,tilePos,player,side)) {
 				logic.onBlockRightClicked(world,tilePos,player,side);
@@ -121,7 +121,7 @@ public class PlayerControllerMixin {
 	)
 	public void useOrPlaceItemStackOnTile(Player player, World world, ItemStack itemstack, TilePosc tilePos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof IRightClickable)) {
+		if (block.getLogic() instanceof IRightClickable) {
 			IRightClickable logic = (IRightClickable) block.getLogic();
 			if (logic.preventsInteraction(world,tilePos,player,side)) {
 				logic.onBlockRightClicked(world,tilePos,player,side);

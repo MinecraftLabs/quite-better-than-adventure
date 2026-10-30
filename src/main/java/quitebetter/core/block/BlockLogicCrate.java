@@ -30,7 +30,6 @@ import net.minecraft.core.world.World;
 import net.minecraft.core.world.pos.TilePos;
 import net.minecraft.core.world.pos.TilePosc;
 import org.jetbrains.annotations.Nullable;
-import quitebetter.core.util.ServerUtil;
 import turniplabs.halplibe.helper.EnvironmentHelper;
 
 import java.util.ArrayList;

@@ -127,8 +127,8 @@ public class BlockLogicMudSlab extends BlockLogicSlab implements IFalling {
 	}
 
 	public static boolean canFallBelow(World world, TilePosc tilePos, int id, int meta) {
-		int blockId = world.getBlockType(tilePos).id();
-		return meta == 2 || (blockId == id && world.getBlockData(tilePos)!=1) || blockId == 0 || blockId == Blocks.FIRE.id() || Blocks.hasTag(blockId, BlockTags.IS_WATER) || Blocks.hasTag(blockId, BlockTags.IS_LAVA );
+		Block<?> block = world.getBlockType(tilePos);
+		return meta == 2 || (block.id() == id && world.getBlockData(tilePos)!=1) || block == Blocks.AIR || block == Blocks.FIRE || Blocks.hasTag(block, BlockTags.IS_WATER) || Blocks.hasTag(block, BlockTags.IS_LAVA );
 	}
 
 	@Override

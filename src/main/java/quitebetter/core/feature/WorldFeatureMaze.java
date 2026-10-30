@@ -62,7 +62,7 @@ public class WorldFeatureMaze implements WorldFeatureInterface {
 		this.slabBlock = ModBlocks.SLAB_BRICK_MUD_BAKED.id();
 
 		Block<?> block = world.getBlockType(new TilePos(x,y-1,z));
-		if (block==null || !block.hasTag(BlockTags.IS_WATER)) {
+		if (!block.hasTag(BlockTags.IS_WATER)) {
 			//CHEST LOOT
 			this.chestLoot = new WeightedRandomBag();
 			this.chestLoot.addEntry(new WeightedRandomLootObject((ItemStack)null), (double)892.0F);

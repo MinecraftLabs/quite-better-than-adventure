@@ -120,7 +120,6 @@ public class ModBlocks {
 			.build("hazard", id("HAZARD"), b -> new BlockLogicHazard(b, Materials.STONE) {})
 			.setBlockItem(b -> new ItemBlock(HAZARD));
 		HAZARD_PAINTED = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setHardness(1.5F).setResistance(25.0F)
 			.setTags(BlockTags.FENCES_CONNECT, BlockTags.MINEABLE_BY_PICKAXE, BlockTags.NOT_IN_CREATIVE_MENU)
 			.setBlockItem(b -> new ItemBlockPainted(b, false))
@@ -141,21 +140,18 @@ public class ModBlocks {
 			.setTags(BlockTags.FENCES_CONNECT, BlockTags.MINEABLE_BY_PICKAXE, BlockTags.MINEABLE_BY_AXE)
 			.build("fan", id("FAN"), b -> new BlockLogicFan(b, Materials.WOOD, false, false) {});
 		ACTIVE_FAN = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setHardness(1F).setResistance(25.0F)
 			.setTicking(true)
 			.setBlockSound(BlockSounds.WOOD)
 			.setTags(BlockTags.FENCES_CONNECT, BlockTags.MINEABLE_BY_PICKAXE, BlockTags.MINEABLE_BY_AXE, BlockTags.NOT_IN_CREATIVE_MENU)
 			.build("active_fan", id("ACTIVE_FAN"), b -> new BlockLogicFan(b, Materials.WOOD, true, false) {});
 		IN_FAN = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setHardness(1F).setResistance(25.0F)
 			.setTicking(true)
 			.setBlockSound(BlockSounds.WOOD)
 			.setTags(BlockTags.FENCES_CONNECT, BlockTags.MINEABLE_BY_PICKAXE, BlockTags.MINEABLE_BY_AXE, BlockTags.NOT_IN_CREATIVE_MENU)
 			.build("in_fan", id("IN_FAN"), b -> new BlockLogicFan(b, Materials.WOOD, false, true) {});
 		ACTIVE_IN_FAN = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setHardness(1F).setResistance(25.0F)
 			.setTicking(true)
 			.setBlockSound(BlockSounds.WOOD)
@@ -209,7 +205,6 @@ public class ModBlocks {
 			.build("mushroom_glowing", id("MUSHROOM_GLOWING"), b -> new BlockLogicGlowingMushroom(b) {}).withLightEmission(0.95F);
 		//PEDESTAL
 		PEDESTAL = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setTags(BlockTags.NOT_IN_CREATIVE_MENU)
 			.build("pedestal", id("PEDESTAL"), b -> new BlockLogicPedestal(b, Materials.CLOTH) {});
 		//SNOW BRICKS
@@ -235,7 +230,6 @@ public class ModBlocks {
 			.build("slab_brick_snow", id("SLAB_BRICK_SNOW"), b -> new BlockLogicSlab(b, BRICK_SNOW) {});
 		//ARROW TORCH BLOCK
 		ARROW_TORCH = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setTags(BlockTags.NOT_IN_CREATIVE_MENU)
 			.build("arrow_torch", id("ARROW_TORCH"), b -> new BlockLogicArrowTorch(b) {}).withLightEmission(1F);
 		//CRATE
@@ -306,7 +300,6 @@ public class ModBlocks {
 			.withLightEmission(1F);
 		//OVERLAY SEASHELL
 		OVERLAY_SEASHELL = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setTags(BlockTags.BROKEN_BY_FLUIDS,BlockTags.NOT_IN_CREATIVE_MENU)
 			.build("overlay_seashell", id("OVERLAY_SEASHELL"), b -> new BlockLogicOverlaySeashells(b, Materials.DECORATION) {});
 		//BRICKS MUD
@@ -367,7 +360,6 @@ public class ModBlocks {
 			.build("block_iron_corrugated", id("BLOCK_IRON_CORRUGATED"), b -> new BlockLogicCorrugatedIron(b, Materials.METAL) {})
 			.setBlockItem(b -> new ItemBlock<>(BLOCK_IRON_CORRUGATED));
 		BLOCK_IRON_CORRUGATED_PAINTED = new BlockBuilder(MOD_ID)
-			.setCreativeInventoryPlacement(misc())
 			.setHardness(2F).setResistance(25.0F)
 			.setTags(BlockTags.CHAINLINK_FENCES_CONNECT, BlockTags.MINEABLE_BY_PICKAXE, BlockTags.NOT_IN_CREATIVE_MENU)
 			.setBlockItem(b -> new ItemBlockPainted<>(b, true))

@@ -78,7 +78,7 @@ public class BlockLogicBoneBlock extends BlockLogic implements IFalling {
 
 	public static boolean canFallBelow(World world, TilePosc tilePos) {
 		Block<?> block = world.getBlockType(tilePos);
-		return block == null || block.hasTag(BlockTags.PLACE_OVERWRITES);
+		return block.hasTag(BlockTags.PLACE_OVERWRITES);
 	}
 
 	@Override

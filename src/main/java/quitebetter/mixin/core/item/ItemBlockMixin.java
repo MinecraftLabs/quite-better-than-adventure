@@ -34,20 +34,18 @@ public class ItemBlockMixin {
 	)
 	public void onUseOnBlock(ItemStack itemstack, World world, @Nullable Player entityplayer, TilePosc blockPos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
 		Block<?> block = world.getBlockType(blockPos);
-		if (block!=null) {
-			if (itemstack.getItem().equals(Blocks.COBBLE_NETHERRACK.asItem())) {
-				if (block.equals(ModBlocks.FAN)) {
-					BlockLogicFan logic = (BlockLogicFan) block.getLogic();
-					logic.overrideSignal(world, blockPos);
-					logic.setActive(world, blockPos, true);
-					cir.setReturnValue(true);
-				}
-			} else if (itemstack.getItem().equals(Blocks.TORCH_REDSTONE_ACTIVE.asItem()) && (entityplayer == null || !entityplayer.isSneaking())) {
-				if (BlockLogicFan.isFan(block)) {
-					BlockLogicFan logic = (BlockLogicFan) block.getLogic();
-					logic.toggleInverted(world, blockPos);
-					cir.setReturnValue(true);
-				}
+		if (itemstack.getItem().equals(Blocks.COBBLE_NETHERRACK.asItem())) {
+			if (block.equals(ModBlocks.FAN)) {
+				BlockLogicFan logic = (BlockLogicFan) block.getLogic();
+				logic.overrideSignal(world, blockPos);
+				logic.setActive(world, blockPos, true);
+				cir.setReturnValue(true);
+			}
+		} else if (itemstack.getItem().equals(Blocks.TORCH_REDSTONE_ACTIVE.asItem()) && (entityplayer == null || !entityplayer.isSneaking())) {
+			if (BlockLogicFan.isFan(block)) {
+				BlockLogicFan logic = (BlockLogicFan) block.getLogic();
+				logic.toggleInverted(world, blockPos);
+				cir.setReturnValue(true);
 			}
 		}
 	}

@@ -5,19 +5,19 @@ import quitebetter.core.block.ModBlocks;
 import quitebetter.core.crafting.ModRecipes;
 import quitebetter.core.feature.ModFeatures;
 import quitebetter.core.item.ModItems;
-import net.fabricmc.api.ModInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import quitebetter.core.tileentity.TileEntityCrate;
 import quitebetter.core.tileentity.TileEntityFan;
 import quitebetter.core.tileentity.TileEntityGlued;
 import quitebetter.core.tileentity.TileEntityPedestal;
 import quitebetter.core.tool.ModMiningLevels;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.core.block.entity.TileEntityDispatcher;
 import net.minecraft.core.util.collection.NamespaceID;
 import turniplabs.halplibe.HalpLibe;
 import turniplabs.halplibe.event.defs.CommonEvents;
 import turniplabs.halplibe.util.dependency.Key;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModCore implements ModInitializer {
 	public static final String MOD_ID = HalpLibe.registerMod("quitebetter");

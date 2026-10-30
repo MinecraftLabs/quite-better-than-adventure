@@ -24,7 +24,7 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 
 	public boolean shouldRenderSide(WorldSource worldSource, TilePosc tilePos, Side side, int meta) {
 		Block<?> frontblock = worldSource.getBlockType(tilePos.add(side.opposite(), new TilePos()));
-		return (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (frontblock==null || !frontblock.isCubeShaped()) );
+		return (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (!frontblock.isCubeShaped()) );
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class BlockModelSupports<T extends BlockLogic> extends BlockModelStandard
 		//OUTSIDE
 		for(Side side : Side.sides) {
 			Block<?> frontblock = worldSource.getBlockType(tilePos.add(side, new TilePos()));
-			if (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (frontblock==null || !frontblock.isCubeShaped()) ) {
+			if (!getBlockTextureFromSideAndMetadata(side, meta).namespaceId.value().contains("top") || (!frontblock.isCubeShaped()) ) {
 				renderBlocks.renderSide(tessellator, worldSource, this, bounds, tilePos, r, g, b, side, meta);
 			}
 		}

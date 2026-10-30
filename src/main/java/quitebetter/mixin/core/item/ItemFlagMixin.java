@@ -27,7 +27,7 @@ public class ItemFlagMixin {
 		)
 	)
 	private void onUseOnBlockDirection(ItemStack stack, World world, @Nullable Player entityplayer, TilePosc blockPos, Side side, double xPlaced, double yPlaced, CallbackInfoReturnable<Boolean> cir) {
-		if (world.getBlockType(blockPos)!=null && world.getBlockType(blockPos).equals(Blocks.FLAG)) {
+		if (world.getBlockType(blockPos).equals(Blocks.FLAG)) {
 			if ( side.isHorizontal()) {
 				world.setBlockData(blockPos, side.direction().id);
 			}

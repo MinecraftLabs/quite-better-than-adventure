@@ -6,6 +6,8 @@ import net.minecraft.core.block.BlockLogicDoor;
 import net.minecraft.core.block.entity.TileEntity;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.item.Items;
+import net.minecraft.core.net.packet.Packet;
+import net.minecraft.core.net.packet.PacketTileEntityData;
 import net.minecraft.core.sound.SoundCategory;
 import net.minecraft.core.world.pos.TilePos;
 
@@ -20,9 +22,9 @@ public class TileEntityGlued extends TileEntity {
 		Random rand = new Random();
 		assert worldObj != null;
 		Block<?> block = worldObj.getBlockType(this.tilePos);
-		assert block != null;
 		if (!this.isGlued()) {
 			this.glued = true;
+			this.setChanged();
 
 			for(int j = 0; j < 4; ++j) {
 				worldObj.spawnParticle("item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double)(rand.nextInt(11)-5)/10, (double)(rand.nextInt(11)-5)/10, (double)(rand.nextInt(11)-5)/10, Items.SLIMEBALL.id, false);
@@ -48,5 +50,10 @@ public class TileEntityGlued extends TileEntity {
 			compoundTag.putBoolean("Glued", this.glued);
 		}
 
+	}
+
+	@Override
+	public Packet getDescriptionPacket() {
+		return new PacketTileEntityData(this);
 	}
 }

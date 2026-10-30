@@ -16,48 +16,6 @@ public class BlockModelLantern<T extends BlockLogic> extends BlockModelCrossedSq
 	}
 
 	@Override
-	public void renderStandalone(TessellatorGeneral tessellator, int metadata, byte lightIndex) {
-		IconCoordinate texIndex = this.getBlockTextureFromSideAndMetadata(Side.BOTTOM, metadata);
-		if (renderBlocks.overrideBlockTexture != null) {
-			texIndex = renderBlocks.overrideBlockTexture;
-		}
-
-		double minU = texIndex.getIconUMin();
-		double maxU = texIndex.getIconUMax();
-		double minV = texIndex.getIconVMin();
-		double maxV = texIndex.getIconVMax();
-		tessellator.offsetTranslation(-0.5, -0.5, -0.5);
-		tessellator.startDrawingQuads();
-		tessellator.setColor1i(this.getStandaloneTintColor(metadata));
-		tessellator.setLightmapCoord1i(lightIndex);
-		double xd = 0.0;
-		double yd = 0.0;
-		double zd = 0.0;
-		double minX = xd + 0.5 - 0.45;
-		double maxX = xd + 0.5 + 0.45;
-		double minZ = zd + 0.5 - 0.45;
-		double maxZ = zd + 0.5 + 0.45;
-		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, minZ, minU, minV);
-		tessellator.addVertexWithUV(minX, yd + 0.0, minZ, minU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + 0.0, maxZ, maxU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, maxZ, maxU, minV);
-		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, maxZ, minU, minV);
-		tessellator.addVertexWithUV(maxX, yd + 0.0, maxZ, minU, maxV);
-		tessellator.addVertexWithUV(minX, yd + 0.0, minZ, maxU, maxV);
-		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, minZ, maxU, minV);
-		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, maxZ, minU, minV);
-		tessellator.addVertexWithUV(minX, yd + 0.0, maxZ, minU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + 0.0, minZ, maxU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, minZ, maxU, minV);
-		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, minZ, minU, minV);
-		tessellator.addVertexWithUV(maxX, yd + 0.0, minZ, minU, maxV);
-		tessellator.addVertexWithUV(minX, yd + 0.0, maxZ, maxU, maxV);
-		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, maxZ, maxU, minV);
-		tessellator.draw();
-		tessellator.offsetTranslation(0.5, 0.5, 0.5);
-	}
-
-	@Override
 	public boolean render(TessellatorGeneral tessellator, WorldSource worldSource, TilePosc tilePos) {
 		tessellator.setLightmapCoord1i(this.block.getLightIndex(worldSource, tilePos));
 		int color = BlockColorDispatcher.getInstance().getDispatch(this.block).getWorldColor(worldSource, tilePos, 0);
@@ -78,26 +36,26 @@ public class BlockModelLantern<T extends BlockLogic> extends BlockModelCrossedSq
 		double maxU = texIndex.getIconUMax();
 		double minV = texIndex.getIconVMin();
 		double maxV = texIndex.getIconVMax();
-		double minX = xd + (double)0.5F - 0.4;
-		double maxX = xd + (double)0.5F + 0.4;
-		double minZ = zd + (double)0.5F - 0.4;
-		double maxZ = zd + (double)0.5F + 0.4;
-		tessellator.addVertexWithUV(minX, yd + (double)1.0F + (double)0.0F, minZ, minU, minV);
-		tessellator.addVertexWithUV(minX, yd + (double)0.0F, minZ, minU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + (double)0.0F, maxZ, maxU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + (double)1.0F + (double)0.0F, maxZ, maxU, minV);
-		tessellator.addVertexWithUV(maxX, yd + (double)1.0F + (double)0.0F, maxZ, minU, minV);
-		tessellator.addVertexWithUV(maxX, yd + (double)0.0F, maxZ, minU, maxV);
-		tessellator.addVertexWithUV(minX, yd + (double)0.0F, minZ, maxU, maxV);
-		tessellator.addVertexWithUV(minX, yd + (double)1.0F + (double)0.0F, minZ, maxU, minV);
-		tessellator.addVertexWithUV(minX, yd + (double)1.0F + (double)0.0F, maxZ, minU, minV);
-		tessellator.addVertexWithUV(minX, yd + (double)0.0F, maxZ, minU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + (double)0.0F, minZ, maxU, maxV);
-		tessellator.addVertexWithUV(maxX, yd + (double)1.0F + (double)0.0F, minZ, maxU, minV);
-		tessellator.addVertexWithUV(maxX, yd + (double)1.0F + (double)0.0F, minZ, minU, minV);
-		tessellator.addVertexWithUV(maxX, yd + (double)0.0F, minZ, minU, maxV);
-		tessellator.addVertexWithUV(minX, yd + (double)0.0F, maxZ, maxU, maxV);
-		tessellator.addVertexWithUV(minX, yd + (double)1.0F + (double)0.0F, maxZ, maxU, minV);
+		double minX = xd + 0.5 - 0.4;
+		double maxX = xd + 0.5 + 0.4;
+		double minZ = zd + 0.5 - 0.4;
+		double maxZ = zd + 0.5 + 0.4;
+		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, minZ, minU, minV);
+		tessellator.addVertexWithUV(minX, yd + 0.0, minZ, minU, maxV);
+		tessellator.addVertexWithUV(maxX, yd + 0.0, maxZ, maxU, maxV);
+		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, maxZ, maxU, minV);
+		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, maxZ, minU, minV);
+		tessellator.addVertexWithUV(maxX, yd + 0.0, maxZ, minU, maxV);
+		tessellator.addVertexWithUV(minX, yd + 0.0, minZ, maxU, maxV);
+		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, minZ, maxU, minV);
+		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, maxZ, minU, minV);
+		tessellator.addVertexWithUV(minX, yd + 0.0, maxZ, minU, maxV);
+		tessellator.addVertexWithUV(maxX, yd + 0.0, minZ, maxU, maxV);
+		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, minZ, maxU, minV);
+		tessellator.addVertexWithUV(maxX, yd + 1.0 + 0.0, minZ, minU, minV);
+		tessellator.addVertexWithUV(maxX, yd + 0.0, minZ, minU, maxV);
+		tessellator.addVertexWithUV(minX, yd + 0.0, maxZ, maxU, maxV);
+		tessellator.addVertexWithUV(minX, yd + 1.0 + 0.0, maxZ, maxU, minV);
 		return true;
 	}
 

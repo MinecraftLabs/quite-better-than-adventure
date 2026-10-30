@@ -34,7 +34,7 @@ public class WorldFeatureGlowingMushrooms {
 
 					for(int i2 = 0; i2 < l1; ++i2) {
 						placePos.set(i1, j1 + i2, k1);
-						if ((world.getBlockType(treePos)==null || world.getBlockType(treePos).hasTag(BlockTags.PLACE_OVERWRITES)) && ModBlocks.MUSHROOM_GLOWING.canStay(world, placePos)) {
+						if (world.getBlockType(treePos).hasTag(BlockTags.PLACE_OVERWRITES) && ModBlocks.MUSHROOM_GLOWING.canStay(world, placePos)) {
 							world.setBlockType(placePos, ModBlocks.MUSHROOM_GLOWING);
 						}
 					}

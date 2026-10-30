@@ -45,11 +45,10 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		assert worldObj != null;
 		TilePos pos = new TilePos(tilePos.x, yo, tilePos.z);
 		return (
-			worldObj.getBlockType(pos) != null &&
-				worldObj.getBlockType(pos).id() == worldObj.getBlockType(tilePos).id() &&
-				worldObj.getBlockData(pos) == worldObj.getBlockData(tilePos) &&
-				worldObj.getTileEntity(pos) != null &&
-				!((TileEntityCrate) worldObj.getTileEntity(pos)).glued
+			worldObj.getBlockType(pos).id() == worldObj.getBlockType(tilePos).id() &&
+			worldObj.getBlockData(pos) == worldObj.getBlockData(tilePos) &&
+			worldObj.getTileEntity(pos) != null &&
+			!((TileEntityCrate) worldObj.getTileEntity(pos)).glued
 		);
 	}
 
@@ -154,7 +153,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
-			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+			if (isCrateConnectable(yi)) {
 				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.hasItemData()) {
 					out += tile.maxItemCount;
@@ -171,7 +170,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
-			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+			if (isCrateConnectable(yi)) {
 				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.maxItemCount != null) {
 					out += tile.maxItemCount;
@@ -187,7 +186,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		this.checkStorageHeights();
 		for (int yi = this.upperHeight; yi >= this.lowerHeight; yi--) {
 			TilePos pos = new TilePos(tilePos.x, yi, tilePos.z);
-			if (worldObj.getBlockType(pos) != null && isCrateConnectable(yi)) {
+			if (isCrateConnectable(yi)) {
 				TileEntityCrate tile = (TileEntityCrate) worldObj.getTileEntity(pos);
 				if (tile.itemCount != null) {
 					out += tile.itemCount;
@@ -534,7 +533,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 			return;
 		}
 		TilePos basketPos = new TilePos(tile.tilePos.x, tile.tilePos.y + 1, tile.tilePos.z);
-		if (this.worldObj.getTileEntity(basketPos) != null && this.worldObj.getTileEntity(new TilePos(this.tilePos.x, this.tilePos.y + 1, this.tilePos.z)) instanceof TileEntityBasket) {
+		if (this.worldObj.getTileEntity(basketPos) != null && this.worldObj.getTileEntity(basketPos) instanceof TileEntityBasket) {
 			TileEntityBasket basket = (TileEntityBasket) this.worldObj.getTileEntity(basketPos);
 			((IBasketContents) basket).quitebetter$transferContents(stack -> {
 				ItemStack stackcorr = tile.pushStack(stack);
@@ -555,6 +554,7 @@ public class TileEntityCrate extends TileEntityGlued implements ICarrySource {
 		assert worldObj != null;
 		if (!this.glued) {
 			this.glued = true;
+			this.setChanged();
 
 			for (int j = 0; j < 4; ++j) {
 				worldObj.spawnParticle("item", tilePos.x + rand.nextFloat(), tilePos.y + rand.nextFloat(), tilePos.z + rand.nextFloat(), (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, (double) (rand.nextInt(11) - 5) / 10, Items.SLIMEBALL.id, false);

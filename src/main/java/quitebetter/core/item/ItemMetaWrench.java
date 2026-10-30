@@ -21,17 +21,12 @@ public class ItemMetaWrench extends Item {
 	@Override
 	public boolean onUseOnBlock(ItemStack itemstack, World world, @Nullable Player player, TilePosc blockPos, Side side, double xPlaced, double yPlaced) {
 		Block<?> block = world.getBlockType(blockPos);
-		if (block != null) {
-			if (true) {
-				player.swingItem();
-				world.playBlockEvent(player, blockPos, 2001, block.id());
-				int oldmeta = world.getBlockData(blockPos);
-				int change = player.isSneaking() ? -1 : 1;
-				world.setBlockDataNotify(blockPos, oldmeta + change);
-				player.sendMessage(I18n.getInstance().translateKey("item.item.quitebetter.meta.wrench.info").replace("*", ""+oldmeta) + " "+world.getBlockData(blockPos));
-				return true;
-			}
-		}
-		return false;
+		player.swingItem();
+		world.playBlockEvent(player, blockPos, 2001, block.id());
+		int oldmeta = world.getBlockData(blockPos);
+		int change = player.isSneaking() ? -1 : 1;
+		world.setBlockDataNotify(blockPos, oldmeta + change);
+		player.sendMessage(I18n.getInstance().translateKey("item.quitebetter.meta.wrench.info").replace("*", ""+oldmeta) + " "+world.getBlockData(blockPos));
+		return true;
 	}
 }

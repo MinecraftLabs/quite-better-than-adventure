@@ -2,7 +2,6 @@ package quitebetter.mixin.client;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.achievements.data.AchievementPageRegistry;
 import net.minecraft.client.gui.achievements.data.AchievementPages;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +19,7 @@ public class MinecraftMixin {
 	public void initStats(CallbackInfo ci) {
 		ModCore.onStatInitialize();
 		if (!FabricLoader.getInstance().isModLoaded("stardew")) {
-			AchievementPageRegistry.getInstance();
+			AchievementPages.init();
 			AchievementPages.netherPage.addAchievement(ModAchievements.LAVA_FISHING, -1, 0);
 		}
 	}

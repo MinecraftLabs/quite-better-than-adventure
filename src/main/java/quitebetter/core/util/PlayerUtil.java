@@ -56,10 +56,11 @@ public class PlayerUtil {
 
 	public static void consumeBowAmmo(Player player) {
 		Item item = player.getNextArrow();
-		if (item!=null) {
-			if (!consumeQuiverAmmo(player)) {
-				player.inventory.consumeInventoryItem(item.id);
-			}
+		if (item == null) {
+			return;
+		}
+		if (hasItemInHotbar(player, item) || !consumeQuiverAmmo(player)) {
+			player.inventory.consumeInventoryItem(item.id);
 		}
 	}
 

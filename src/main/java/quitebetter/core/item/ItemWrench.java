@@ -137,56 +137,54 @@ public class ItemWrench extends Item {
 		boolean success = false;
 
 		Block<?> block = world.getBlockType(tilePos);
-		if (block != null) {
-			BlockLogic logic = block.getLogic();
-			int meta = world.getBlockData(tilePos);
+		BlockLogic logic = block.getLogic();
+		int meta = world.getBlockData(tilePos);
 
-			if (logic instanceof BlockLogicRotatable) {
-				world.setBlockDataNotify(tilePos,
-					BlockLogicRotatable.setDirection(meta,
-						rotateRotatable(BlockLogicRotatable.getDirectionFromMeta(meta), side)
-					)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicAxisAlignedPainted) {
-				world.setBlockDataNotify(tilePos,
-					((BlockLogicAxisAlignedPainted) logic).stripAxisFromMetadata(meta) |
-						BlockLogicAxisAligned.axisToMeta(
-							rotateAxisAligned(BlockLogicAxisAlignedPainted.metaToAxis(meta), side)
-						)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicVeryRotatable) {
-				world.setBlockDataNotify(tilePos,
-					BlockLogicVeryRotatable.setDirection(meta,
-						rotateVeryRotatable(BlockLogicVeryRotatable.metaToDirection(meta), side)
-					)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicAxisAligned) {
-				world.setBlockDataNotify(tilePos,
+		if (logic instanceof BlockLogicRotatable) {
+			world.setBlockDataNotify(tilePos,
+				BlockLogicRotatable.setDirection(meta,
+					rotateRotatable(BlockLogicRotatable.getDirectionFromMeta(meta), side)
+				)
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicAxisAlignedPainted) {
+			world.setBlockDataNotify(tilePos,
+				((BlockLogicAxisAlignedPainted) logic).stripAxisFromMetadata(meta) |
 					BlockLogicAxisAligned.axisToMeta(
-						rotateAxisAligned(BlockLogicAxisAligned.metaToAxis(meta), side)
+						rotateAxisAligned(BlockLogicAxisAlignedPainted.metaToAxis(meta), side)
 					)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicStairsPainted) {
-				world.setBlockDataNotify(tilePos,
-					(meta & 240) | rotateStairs(meta & 15, side)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicStairs) {
-				world.setBlockDataNotify(tilePos,
-					rotateStairs(meta,side)
-				);
-				success = true;
-			} else if (logic instanceof BlockLogicPistonBase) {
-				int data = PistonCommon.fixLegacyBaseData(world, tilePos);
-				if (!PistonCommon.IS_EXTENDED.bool(data)) {
-					world.setBlockDataNotify(tilePos, PistonCommon.DIRECTION.set(data, rotateVeryRotatable(Direction.fromId(PistonCommon.DIRECTION.get(data)), side).id));
-				}
-				success = true;
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicVeryRotatable) {
+			world.setBlockDataNotify(tilePos,
+				BlockLogicVeryRotatable.setDirection(meta,
+					rotateVeryRotatable(BlockLogicVeryRotatable.metaToDirection(meta), side)
+				)
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicAxisAligned) {
+			world.setBlockDataNotify(tilePos,
+				BlockLogicAxisAligned.axisToMeta(
+					rotateAxisAligned(BlockLogicAxisAligned.metaToAxis(meta), side)
+				)
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicStairsPainted) {
+			world.setBlockDataNotify(tilePos,
+				(meta & 240) | rotateStairs(meta & 15, side)
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicStairs) {
+			world.setBlockDataNotify(tilePos,
+				rotateStairs(meta,side)
+			);
+			success = true;
+		} else if (logic instanceof BlockLogicPistonBase) {
+			int data = PistonCommon.fixLegacyBaseData(world, tilePos);
+			if (!PistonCommon.IS_EXTENDED.bool(data)) {
+				world.setBlockDataNotify(tilePos, PistonCommon.DIRECTION.set(data, rotateVeryRotatable(Direction.fromId(PistonCommon.DIRECTION.get(data)), side).id));
 			}
+			success = true;
 		}
 		if (success) {
 			Random random = new Random();

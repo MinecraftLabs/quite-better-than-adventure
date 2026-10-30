@@ -1,10 +1,8 @@
 package quitebetter.mixin.core;
 
 import net.minecraft.core.world.World;
-import net.minecraft.core.world.biome.Biome;
 import net.minecraft.core.world.chunk.Chunk;
 import net.minecraft.core.world.generate.chunk.perlin.overworld.ChunkDecoratorOverworld;
-import net.minecraft.core.world.pos.TilePos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,14 +31,9 @@ public class ChunkDecoratorOverworldMixin {
 		this.world.scheduledUpdatesAreImmediate = true;
 		int chunkX = chunk.pos.x;
 		int chunkZ = chunk.pos.z;
-		int minY = this.world.getWorldType().getMinY(this.world);
-		int maxY = this.world.getWorldType().getMaxY(this.world);
-		int rangeY = maxY + 1 - minY;
-		float oreHeightModifier = (float)rangeY / 128.0F;
 		int x = chunkX * 16;
 		int z = chunkZ * 16;
 		int y = this.world.getHeightValue(x + 16, z + 16);
-		Biome biome = this.world.getBlockBiome(new TilePos(x + 16, y, z + 16));
 		Random random = new Random(this.world.getRandomSeed()*chunkX*chunkZ);
 		Random chunkRandom = chunk.getChunkRandom(75644760L);
 		ModFeatures.ChunkDecoration(this.world,chunk,chunkX,chunkZ,chunkRandom,x,y,z,random);

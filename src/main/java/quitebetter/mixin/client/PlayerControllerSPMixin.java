@@ -31,7 +31,7 @@ public class PlayerControllerSPMixin {
 		World world = controller.mc.currentWorld;
 		Player player = controller.mc.thePlayer;
 		Block<?> block = world.getBlockType(tilePos);
-		if (block!=null && (block.getLogic() instanceof ILeftClickable)) {
+		if (block.getLogic() instanceof ILeftClickable) {
 			ILeftClickable logic = (ILeftClickable) block.getLogic();
 			if (logic.preventsBreaking(world,tilePos,player,side)) {
 				cir.cancel();

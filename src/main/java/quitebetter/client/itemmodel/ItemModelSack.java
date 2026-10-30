@@ -29,7 +29,7 @@ public class ItemModelSack extends ItemModelStandard {
 		if (itemstack.stackSize != 1 || override != null) {
 			String s = override != null ? override : "" + itemstack.stackSize;
 			GLRenderer.disableState(State.DEPTH_TEST);
-			fontRenderer.render((CharSequence)s, x + 19 - 2 - fontRenderer.stringWidth(s), y + 6 + 3).setShadow().setColor(16777215 | a << 24).call();
+			fontRenderer.render(s, x + 19 - 2 - fontRenderer.stringWidth(s), y + 6 + 3).setShadow().setColor(16777215 | a << 24).call();
 			GLRenderer.enableState(State.DEPTH_TEST);
 		}
 

@@ -37,7 +37,7 @@ public class BlockLogicLanternCoal extends BlockLogic {
 
 	@Override
 	public boolean canStay(World world, TilePosc tilePos) {
-		return world.getBlockType(tilePos.up(new TilePos()))!=null || world.getBlockType(tilePos.down(new TilePos()))!=null;
+		return !world.isAirBlock(tilePos.up(new TilePos())) || !world.isAirBlock(tilePos.down(new TilePos()));
 	}
 
 	@Override

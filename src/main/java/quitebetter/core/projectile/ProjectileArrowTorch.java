@@ -21,7 +21,6 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 	public ProjectileArrowTorch(World world, Mob entityliving, boolean doesArrowBelongToPlayer) {
 		super(world, entityliving, doesArrowBelongToPlayer, 0);
 		this.mobsHit = 0;
-		this.inTile = Blocks.AIR;
 		this.shake = 0;
 		this.inData = 0;
 		this.stack = new ItemStack(Items.AMMO_ARROW);
@@ -34,7 +33,6 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 	public ProjectileArrowTorch(World world, double x, double y, double z) {
 		super(world, x, y, z, 0);
 		this.mobsHit = 0;
-		this.inTile = Blocks.AIR;
 		this.shake = 0;
 		this.inData = 0;
 		this.stack = new ItemStack(Items.AMMO_ARROW);
@@ -71,33 +69,32 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 		int x;
 		int y;
 		int z;
-		TilePos tilePos = this.tilePos;
 		//CENTERED
-		x = tilePos.x;
-		y = tilePos.y;
-		z = tilePos.z;
+		x = this.tilePos.x;
+		y = this.tilePos.y;
+		z = this.tilePos.z;
 		TilePos pos = new TilePos(x, y, z);
 		//TNT BLOCK
-		if (world.getBlockType(pos)!=null && world.getBlockType(pos).equals(Blocks.TNT)) {
+		if (world.getBlockType(pos).equals(Blocks.TNT)) {
 			((BlockLogicTNT) world.getBlockType(pos).getLogic()).ignite(world,pos,true);
 			return;
 		}
-		if (tilePos.y<(int) this.y) {
+		if (this.tilePos.y<(int) this.y) {
 			y=(int)this.y;
-		} else if (tilePos.x<(int) this.x) {
+		} else if (this.tilePos.x<(int) this.x) {
 			x=(int)this.x;
-		} else if (tilePos.x>(int) this.x) {
+		} else if (this.tilePos.x>(int) this.x) {
 			x=(int)this.x;
-		} else if (tilePos.z<(int) this.z) {
-			z=tilePos.z+1;
-		} else if (tilePos.z>=(int) this.z) {
-			z=tilePos.z-1;
+		} else if (this.tilePos.z<(int) this.z) {
+			z=this.tilePos.z+1;
+		} else if (this.tilePos.z>=(int) this.z) {
+			z=this.tilePos.z-1;
 		}
 
 		pos.set(x, y, z);
-		if (world.getBlockType(pos) == null || (world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
+		if ((world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
 			if (ModBlocks.ARROW_TORCH.canPlaceAt(world,pos)) {
-				world.setBlockType(pos, ModBlocks.ARROW_TORCH);
+				world.setBlockTypeNotify(pos, ModBlocks.ARROW_TORCH);
 				world.playSoundAtEntity((Entity)null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 				for (int i=1; i < 5; i++) {
 					world.spawnParticle("smoke", x+0.5, y+0.5, z+0.5, random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), random.nextFloat()*(random.nextInt(2)==0 ? -0.3 : 0.3), 0, false);
@@ -114,9 +111,9 @@ public class ProjectileArrowTorch extends ProjectileArrow {
 						y = (int) (this.y + yi);
 						z = (int) (this.z + zi);
 						pos.set(x, y, z);
-						if (world.getBlockType(pos) == null || (world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
+						if ((world.getBlockType(pos).hasTag(BlockTags.PLACE_OVERWRITES) && !(world.getBlockType(pos).hasTag(BlockTags.IS_LAVA)) && !(world.getBlockType(pos).hasTag(BlockTags.IS_WATER)) )) {
 							if (ModBlocks.ARROW_TORCH.canPlaceAt(world, pos)) {
-								world.setBlockType(pos, ModBlocks.ARROW_TORCH);
+								world.setBlockTypeNotify(pos, ModBlocks.ARROW_TORCH);
 								world.playSoundAtEntity((Entity) null, this, "fire.ignite", 1F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
 								for (int i = 1; i < 5; i++) {
 									world.spawnParticle("smoke", x + 0.5, y + 0.5, z + 0.5, random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), random.nextFloat() * (random.nextInt(2) == 0 ? -0.3 : 0.3), 0, false);

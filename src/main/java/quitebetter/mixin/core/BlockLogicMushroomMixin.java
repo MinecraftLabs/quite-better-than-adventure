@@ -22,7 +22,7 @@ public class BlockLogicMushroomMixin {
 		at = @At("TAIL")
 	)
 	public void updateTick(World world, TilePosc tilePos, Random rand, boolean isRandomTick, CallbackInfo ci) {
-		if (world.getBlockType(tilePos.down(new TilePos()))!=null && world.getBlockType(tilePos.down(new TilePos())).equals(Blocks.COBBLE_STONE_MOSSY)) {
+		if (world.getBlockType(tilePos.down(new TilePos())).equals(Blocks.COBBLE_STONE_MOSSY)) {
 			if (rand.nextInt(2)==0) {
 				BlockLogicMushroom that = (BlockLogicMushroom)(Object)this;
 				TilePos checkPos = new TilePos();
